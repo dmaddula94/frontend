@@ -1,14 +1,17 @@
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
     // background-color: #333; // or any color you prefer
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(5px);
 
     &.dark {
         background: rgba(0, 0, 0, 0.5);
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
     }
     
   
