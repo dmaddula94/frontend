@@ -9,6 +9,7 @@ import "./index.scss";
 function Header() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme);
+  const user = useSelector((state) => state.user);
 
   return (
     <header className={`header ${theme.darkMode ? "dark" : "light"}`}>
@@ -20,19 +21,21 @@ function Header() {
             className="logo"
           />
         </div>
-        <nav className="navigation">
-          <ul>
-            <li>
-              <a href="/">Home</a>
-            </li>
-            <li>
-              <a href="/about">About</a>
-            </li>
-            <li>
-              <a href="/contact">Contact</a>
-            </li>
-          </ul>
-        </nav>
+        {user.isAuthenticated && (
+          <nav className="navigation">
+            <ul>
+              <li>
+                <a href="/">Home</a>
+              </li>
+              <li>
+                <a href="/about">About</a>
+              </li>
+              <li>
+                <a href="/contact">Contact</a>
+              </li>
+            </ul>
+          </nav>
+        )}
 
         {/* <div className="profile">
         <img src="/path-to-profile-pic.png" alt="Profile" className="profile-pic" />

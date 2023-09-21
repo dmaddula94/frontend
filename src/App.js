@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+} from "react-router-dom";
 import { setLocation, setError } from "./redux/reducers/locationSlice";
 import { lightTheme, darkTheme } from "./theme";
 import Header from "./components/Header";
 import "./App.scss";
 import { getLocation } from "./utils/location";
 import CurrentWeather from "./components/CurrentWeather";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+
+function ProtectedRoute({ children }) {
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
 
 function App() {
   const dispatch = useDispatch();
@@ -69,26 +84,37 @@ function App() {
   return (
     <ThemeProvider theme={theme.darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <div
-        style={{
-          height: "100vh",
-          backgroundImage: `url('/${weather.background}.gif')`,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center center",
-        }}
-      >
-        <div className="glassy-overlay"></div>
+      <Router>
         <div
-          style={{ position: "relative" }}
-          className={`content ${theme.darkMode ? "dark-mode" : "light-mode"}`}
+          style={{
+            height: "100vh",
+            backgroundImage: `url('/${weather.background}.gif')`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+          }}
+          className={`${theme.darkMode ? "dark-mode" : "light-mode"}`}
         >
-          <Header />
-          <div className="container">
-            <CurrentWeather />
+          <div className="glassy-overlay"></div>
+          <div style={{ position: "relative" }} className={`content`}>
+            <Header />
+            <div className="container">
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <CurrentWeather />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+              </Routes>
+            </div>
           </div>
         </div>
-      </div>
+      </Router>
     </ThemeProvider>
   );
 }

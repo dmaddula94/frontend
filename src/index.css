@@ -12,6 +12,10 @@ code {
     monospace;
 }
 
+.border-radius {
+  border-radius: 16px;
+}
+
 .dark-mode {
   color: #fff;
 }
@@ -34,4 +38,44 @@ code {
 
 .light-mode .glassbackground {
   background-color: rgba(255, 255, 255, 0.5);
+}
+
+.centerX {
+  transform: translate(50%, 0);
+}
+
+.centerY {
+  transform: translate(0, 50%);
+}
+
+.center {
+  transform: translate(50%, 50%);
+}
+
+.dark-mode .text-theme {
+  color: #fff;
+}
+
+.dark-mode .text-theme-inverted {
+  color: #000;
+}
+
+.light-mode .text-theme {
+  color: #000;
+}
+
+.light-mode .text-theme-inverted {
+  color: #fff;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

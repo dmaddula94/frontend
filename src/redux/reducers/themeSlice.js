@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  darkMode: true
+  darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches
 };
 
 export const themeSlice = createSlice({
