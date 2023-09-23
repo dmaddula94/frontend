@@ -7,6 +7,7 @@ import {
   toFahrenheit,
 } from "../../utils/weather";
 import { setWeather, setBackground } from "../../redux/reducers/weatherSlice";
+import { startLoader, stopLoader } from "../../redux/reducers/loadingSlice";
 import "./index.scss";
 
 function CurrentWeather() {
@@ -16,8 +17,10 @@ function CurrentWeather() {
 
   useEffect(() => {
     if (location.name && !weather?.current) {
+      dispatch(startLoader());
       getCurrentWeather(location.name)
         .then((weather) => {
+          dispatch(stopLoader());
           if (weather) {
             const temp = weather?.data?.values;
             temp.time = weather?.data?.time;
@@ -41,6 +44,7 @@ function CurrentWeather() {
           }
         })
         .catch((err) => {
+          dispatch(stopLoader());
           console.log(err);
         });
     }

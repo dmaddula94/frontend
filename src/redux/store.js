@@ -4,11 +4,14 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import rootReducer from './reducers';
 
+//slices
+// import loadingSlice from './reducers/loadingSlice';
+
 const persistConfig = {
   key: 'root',
   storage,
   // whitelist: ['someSlice'] // if you want to persist only some slices
-  // blacklist: ['someOtherSlice'] // if you don't want to persist some slices
+  blacklist: ['loading'] // if you don't want to persist some slices
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   current: null,
-  background: 'sunny'
+  background: 'default'
 };
 
 export const weatherSlice = createSlice({
