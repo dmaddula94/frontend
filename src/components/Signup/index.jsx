@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   TextField,
   Button,
@@ -15,8 +15,11 @@ import {
 } from "@mui/material";
 import {validateFirstName, validateLastName, validateEmail, validateMobile, validatePassword, validateConfirmPassword} from "../../utils/helpers";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
+import { login } from "../../redux/reducers/userSlice";
 
 function Signup() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useSelector((state) => state.theme);
   const [firstName, setFirstName] = useState("");
@@ -61,11 +64,19 @@ function Signup() {
     return isValid;
   }
 
-  const handleSignup = () => {
-    if (validate()) {
-      // Handle signup logic here
-    } else {
-      return;
+  const handleSignup = async () => {
+    try {
+      const response = await api.post("/create", { email, password });
+      if (response.data && response.data.token) {
+        dispatch(login({ user: response.data.user, token: response.data.token }));
+        navigate("/");
+      } else {
+        // Handle any error messages or alerts here
+        console.error("Failed to login");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      // Handle any error messages or alerts here
     }
   };
 
