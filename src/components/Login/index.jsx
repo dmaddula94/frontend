@@ -1,16 +1,49 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { TextField, Button, Typography, Box } from "@mui/material";
+import { useSelector, useDispatch } from "react-redux";
+import { TextField, Button, Typography, Box, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
+import { login } from "../../redux/reducers/userSlice";
+import { validateEmail, validatePassword } from "../../utils/helpers";
 
 function Login() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useSelector((state) => state.theme);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  const handleLogin = () => {
-    // Handle login logic here
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    handleBlur(validateEmail, e.target.value, setEmailError);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    handleBlur(validatePassword, e.target.value, setPasswordError);
+  };
+
+  const handleBlur = (validator, value, setter) => {
+    const error = validator(value);
+    setter(error);
+    setIsFormValid(!error);
+  };
+
+  const handleLogin = async () => {
+    try {
+      const response = await api.post("/login", { email, password });
+      if (response.data && response.data.token) {
+        dispatch(login({ user: response.data.user, token: response.data.token }));
+        navigate("/");
+      } else {
+        console.error("Failed to login");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
   };
 
   return (
@@ -35,7 +68,10 @@ function Login() {
         className="mb-3"
         variant="outlined"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={handleEmailChange}
+        onBlur={() => handleBlur(validateEmail, email, setEmailError)}
+        error={!!emailError}
+        helperText={emailError}
         fullWidth
       />
       <TextField
@@ -44,7 +80,10 @@ function Login() {
         className="mb-3"
         variant="outlined"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={handlePasswordChange}
+        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+        error={!!passwordError}
+        helperText={passwordError}
         fullWidth
       />
       <Button
@@ -52,6 +91,7 @@ function Login() {
         variant="contained"
         color="primary"
         onClick={handleLogin}
+        disabled={!isFormValid}
       >
         Login
       </Button>
@@ -63,6 +103,14 @@ function Login() {
       >
         Sign Up
       </Button>
+      <Link
+        component="button"
+        variant="body2"
+        onClick={() => navigate("/forgot-password")}
+        className="mb-3 w-50"
+      >
+        Forgot Password?
+      </Link>
     </Box>
   );
 }
