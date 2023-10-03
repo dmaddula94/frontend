@@ -2,10 +2,16 @@ import React, { useState } from "react";
 import { TextField, Button, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { validatePassword, validateConfirmPassword } from "../../utils/helpers";
 
 function ResetPassword() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -21,9 +27,9 @@ function ResetPassword() {
   const validate = () => {
     let isValid = true;
 
-    if (!validatePassword(password)) isValid = false;
-    if (!validateConfirmPassword(password, confirmPassword)) isValid = false;
-
+    if (validatePassword(password)) isValid = false;
+    if (validateConfirmPassword(password, confirmPassword)) isValid = false;
+    
     setIsFormValid(isValid);
 
     return isValid;
@@ -60,30 +66,54 @@ function ResetPassword() {
         Reset Password
       </Typography>
       <TextField
-        error={!!passwordError}
-        helperText={passwordError}
-        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+        type={showPassword ? "text" : "password"}
+        required
         label="New Password"
-        type="password"
+        className="mb-3"
         variant="outlined"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+        error={!!passwordError}
+        helperText={passwordError}
         fullWidth
-        required
-        className="mb-3"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <TextField
-        error={!!confirmPasswordError}
-        helperText={confirmPasswordError}
-        onBlur={() => handleBlur(validateConfirmPassword, confirmPassword, setConfirmPasswordError, password)}
+        type={showConfirmPassword ? "text" : "password"}
         label="Confirm New Password"
-        type="password"
+        className="mb-3"
         variant="outlined"
+        required
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        onBlur={() => handleBlur(validateConfirmPassword, confirmPassword, setConfirmPasswordError, password)}
+        error={!!confirmPasswordError}
+        helperText={confirmPasswordError}
         fullWidth
-        required
-        className="mb-3"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <Button
         variant="contained"

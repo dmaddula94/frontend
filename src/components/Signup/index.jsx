@@ -11,9 +11,20 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-  Box
+  Box,
 } from "@mui/material";
-import {validateFirstName, validateLastName, validateEmail, validateMobile, validatePassword, validateConfirmPassword} from "../../utils/helpers";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validateMobile,
+  validatePassword,
+  validateConfirmPassword,
+} from "../../utils/helpers";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { login } from "../../redux/reducers/userSlice";
@@ -22,6 +33,8 @@ function Signup() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useSelector((state) => state.theme);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,13 +75,15 @@ function Signup() {
     setIsFormValid(isValid);
 
     return isValid;
-  }
+  };
 
   const handleSignup = async () => {
     try {
       const response = await api.post("/create", { email, password });
       if (response.data && response.data.token) {
-        dispatch(login({ user: response.data.user, token: response.data.token }));
+        dispatch(
+          login({ user: response.data.user, token: response.data.token })
+        );
         navigate("/");
       } else {
         // Handle any error messages or alerts here
@@ -99,7 +114,9 @@ function Signup() {
       <TextField
         error={!!firstNameError}
         helperText={firstNameError}
-        onBlur={() => handleBlur(validateFirstName, firstName, setFirstNameError)}
+        onBlur={() =>
+          handleBlur(validateFirstName, firstName, setFirstNameError)
+        }
         label="First Name"
         variant="outlined"
         value={firstName}
@@ -142,34 +159,62 @@ function Signup() {
         value={mobile}
         onChange={(e) => setMobile(e.target.value)}
         fullWidth
-        required
         className="mb-3"
       />
       <TextField
-        error={!!passwordError}
-        helperText={passwordError}
-        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+        type={showPassword ? "text" : "password"}
         label="Password"
-        type="password"
+        className="mb-3"
         variant="outlined"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+        error={!!passwordError}
+        helperText={passwordError}
         fullWidth
-        required
-        className="mb-3"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <TextField
-        error={!!confirmPasswordError}
-        helperText={confirmPasswordError}
-        onBlur={() => handleBlur(validateConfirmPassword, confirmPassword, setConfirmPasswordError, password)}
+        type={showConfirmPassword ? "text" : "password"}
         label="Confirm Password"
-        type="password"
+        className="mb-3"
         variant="outlined"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        onBlur={() =>
+          handleBlur(
+            validateConfirmPassword,
+            confirmPassword,
+            setConfirmPasswordError,
+            password
+          )
+        }
+        error={!!confirmPasswordError}
+        helperText={confirmPasswordError}
         fullWidth
-        required
-        className="mb-3"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <div className="d-flex flex-column mb-3">
         <FormControlLabel

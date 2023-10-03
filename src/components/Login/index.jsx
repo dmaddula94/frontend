@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { TextField, Button, Typography, Box, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import api from "../../api";
 import { login } from "../../redux/reducers/userSlice";
 import { validateEmail, validatePassword } from "../../utils/helpers";
@@ -10,6 +14,7 @@ function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useSelector((state) => state.theme);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -36,7 +41,9 @@ function Login() {
     try {
       const response = await api.post("/login", { email, password });
       if (response.data && response.data.token) {
-        dispatch(login({ user: response.data.user, token: response.data.token }));
+        dispatch(
+          login({ user: response.data.user, token: response.data.token })
+        );
         navigate("/");
       } else {
         console.error("Failed to login");
@@ -75,8 +82,8 @@ function Login() {
         fullWidth
       />
       <TextField
+        type={showPassword ? "text" : "password"}
         label="Password"
-        type="password"
         className="mb-3"
         variant="outlined"
         value={password}
@@ -85,6 +92,18 @@ function Login() {
         error={!!passwordError}
         helperText={passwordError}
         fullWidth
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <Button
         className="mb-3 w-50"
