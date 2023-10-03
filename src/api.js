@@ -1,22 +1,28 @@
 import axios from "axios";
-import store from "./redux/store"; // Import your Redux store
-import { login } from "./redux/reducers/userSlice"; // Import the login action
+import { store } from "./redux/store";
+import { login } from "./redux/reducers/userSlice";
+import { startLoader, stopLoader } from "./redux/reducers/loadingSlice";
 
 const api = axios.create({
-  baseURL: "https://your-api-endpoint.com",
+  baseURL: "https://us-central1-marist-weather-dashboard.cloudfunctions.net/api",
 });
 
 // Add a request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Start the loader
+    store.dispatch(startLoader());
+
     const state = store.getState();
     const token = state.user.token;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `${token}`;
     }
     return config;
   },
   (error) => {
+    // Stop the loader in case of a request error
+    store.dispatch(stopLoader());
     return Promise.reject(error);
   }
 );
@@ -24,39 +30,40 @@ api.interceptors.request.use(
 // Add a response interceptor
 api.interceptors.response.use(
   (response) => {
+    // Stop the loader when the response is received
+    store.dispatch(stopLoader());
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
+    // Stop the loader in case of a response error
+    store.dispatch(stopLoader());
 
-    // Check if the error is a 401 and the request is not a re-authentication request
+    const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Attempt to refresh the token
       const state = store.getState();
-      const refreshToken = state.user.refreshToken; // Assuming you also store the refresh token in the Redux store
-      const res = await axios.post(
-        "https://your-api-endpoint.com/refresh-token",
-        { refreshToken }
-      );
-
-      if (res.status === 201) {
-        store.dispatch(
-          login({
-            user: state.user.user, // Keep the existing user data
-            token: res.data.authToken,
-          })
+      const refreshToken = state.user.refreshToken;
+      try {
+        const res = await axios.post(
+          `https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/refresh`,
+          { refreshToken }
         );
 
-        // Modify the original request to use the new token
-        originalRequest.headers.Authorization = `Bearer ${res.data.authToken}`;
-
-        // Repeat the original request
-        return api(originalRequest);
+        if (res.status === 201) {
+          store.dispatch(
+            login({
+              user: state.user.user,
+              token: res.data.authToken,
+            })
+          );
+          originalRequest.headers.Authorization = `${res.data.authToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );

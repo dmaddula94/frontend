@@ -14,6 +14,9 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Loader from "./Loader";
 import Home from "./components/Home";
+import Footer from "./components/Footer";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -56,8 +59,11 @@ function App() {
                 />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               </Routes>
             </div>
+            <Footer />
           </div>
         </div>
       </Router>
