@@ -43,7 +43,8 @@ export const validateEmail = (email) => {
 export const validateMobile = (mobile) => {
   const mobileRegex = /^[0-9]{10}$/; // Assuming a 10-digit mobile number
   if (!mobile.trim()) {
-    return "Mobile number is required for alerts";
+    return null;
+    // return "Mobile number is required for alerts";
   } else if (!mobileRegex.test(mobile)) {
     return "Invalid mobile number";
   } else {
