@@ -42,7 +42,7 @@ function Login() {
       const response = await api.post("/login", { email, password });
       if (response.data && response.data.token) {
         dispatch(
-          login({ user: response.data.user, token: response.data.token })
+          login({ user: response.data, token: response.data.token })
         );
         navigate("/");
       } else {

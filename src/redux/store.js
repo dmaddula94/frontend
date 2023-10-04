@@ -11,7 +11,7 @@ const persistConfig = {
   key: 'root',
   storage,
   // whitelist: ['someSlice'] // if you want to persist only some slices
-  blacklist: ['loading'] // if you don't want to persist some slices
+  blacklist: ['loading', 'weather'] // if you don't want to persist some slices
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

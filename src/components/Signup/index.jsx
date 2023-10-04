@@ -79,10 +79,10 @@ function Signup() {
 
   const handleSignup = async () => {
     try {
-      const response = await api.post("/create", { email, password });
+      const response = await api.post("/create", { email, password, firstName, lastName, phoneNumber: mobile, alerts: enableAlerts});
       if (response.data && response.data.token) {
         dispatch(
-          login({ user: response.data.user, token: response.data.token })
+          login({ user: response.data, token: response.data.token })
         );
         navigate("/");
       } else {

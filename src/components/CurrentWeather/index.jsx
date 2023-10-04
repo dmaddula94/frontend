@@ -14,6 +14,7 @@ function CurrentWeather() {
   const dispatch = useDispatch();
   const location = useSelector((state) => state.location);
   const weather = useSelector((state) => state.weather);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     if (location.name && !weather?.current) {
@@ -54,15 +55,16 @@ function CurrentWeather() {
     <>
       {weather?.current && (
         <div className="glassbackground current-weather col-5">
-          <h1>
+          <h1>{`Hello, ${user?.user?.firstName}`}</h1>
+          <h2>
             <span>{location.name}</span>{" - "}
             <span>{`${
               weather?.current?.temperatureFahrenheit
                 ? weather?.current?.temperatureFahrenheit + "°F"
                 : ""
             } `}</span>
-          </h1>
-          <h2>{weather?.current?.weatherState}</h2>
+          </h2>
+          <h3>{weather?.current?.weatherState}</h3>
         </div>
       )}
     </>
