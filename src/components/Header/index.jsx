@@ -51,9 +51,7 @@ function Header() {
   }, []);
 
   const getCurrentLocation = () => {
-    dispatch(
-      setLocation(location.current)
-    );
+    dispatch(setLocation(location.current));
     setSearchQuery(location.current.name);
   };
 
@@ -81,53 +79,41 @@ function Header() {
           />
         </div>
         <div className="right-section">
-          {/* <div className="location-search">
-        <button onClick={getCurrentLocation} className="current-location-btn">
-            <LocationSearchingIcon />
-          </button>
-          <StandaloneSearchBox
-            onLoad={(ref) => (searchBoxRef.current = ref)}
-            onPlacesChanged={onPlacesChanged}
-          >
-            <div className="search-box">
-              <SearchIcon className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search Location"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          {user.isAuthenticated && (
+            <div className="location-search">
+              <StandaloneSearchBox
+                onLoad={(ref) => (searchBoxRef.current = ref)}
+                onPlacesChanged={onPlacesChanged}
+              >
+                <TextField
+                  fullWidth
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Location"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon
+                          style={{ color: sys_theme.palette.text.primary }}
+                        />
+                      </InputAdornment>
+                    ),
+                    startAdornment: (
+                      <InputAdornment position="end">
+                        <LocationSearchingIcon
+                          style={{
+                            cursor: "pointer",
+                            color: sys_theme.palette.text.primary,
+                          }}
+                          onClick={getCurrentLocation}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </StandaloneSearchBox>
             </div>
-          </StandaloneSearchBox>
-        </div> */}
-          <div className="location-search">
-            <StandaloneSearchBox
-              onLoad={(ref) => (searchBoxRef.current = ref)}
-              onPlacesChanged={onPlacesChanged}
-            >
-              <TextField
-                fullWidth
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Location"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon style={{ color: sys_theme.palette.text.primary }} />
-                    </InputAdornment>
-                  ),
-                  startAdornment: (
-                    <InputAdornment position="end">
-                      <LocationSearchingIcon
-                        style={{ cursor: "pointer", color: sys_theme.palette.text.primary }}
-                        onClick={getCurrentLocation}
-                      />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </StandaloneSearchBox>
-          </div>
+          )}
           <div className="profile-and-theme">
             {user.isAuthenticated && (
               <>
