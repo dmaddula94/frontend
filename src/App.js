@@ -28,6 +28,11 @@ function App() {
   const theme = useSelector((state) => state.theme);
   const weather = useSelector((state) => state.weather);
 
+  React.useEffect(() => {
+    document.body.className = ''; // Clear any existing classes
+    document.body.classList.add(`${theme.darkMode ? "dark-mode" : "light-mode"}`); // Add the current theme as a class
+}, [theme]);
+
 
   return (
     <ThemeProvider theme={theme.darkMode ? darkTheme : lightTheme}>
@@ -37,7 +42,7 @@ function App() {
         <div
           style={{
             height: "100vh",
-            backgroundImage: `url('/${weather.background}.gif')`,
+            backgroundImage: `url('/backgrounds/${weather.background}.gif')`,
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center center",

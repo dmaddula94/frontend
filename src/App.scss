@@ -66,3 +66,39 @@
   flex-grow: 1; /* take up remaining space */
   overflow-y: auto; /* make it scrollable */
 }
+
+.location-search {
+  position: relative;
+  .MuiTextField-root {
+    width: 100%;
+    background-color: transparent; // Adjust according to your theme
+    
+    .MuiInputBase-root {
+      // Remove border and box-shadow if any
+      border: none;
+      box-shadow: none;
+
+      // Adjust color according to your theme
+      color: #fff; 
+
+      // Remove underlines
+      &:before,
+      &:after {
+        display: none;
+      }
+    }
+
+    .MuiInputAdornment-root {
+      // Vertically align icons
+      align-items: center;
+
+      // Adjust color according to your theme
+      color: #fff; 
+
+      // If you want to adjust the size of the icons
+      svg {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}

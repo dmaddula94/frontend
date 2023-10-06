@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getLocation } from "../../utils/location";
 import CurrentWeather from "../CurrentWeather";
-import { setLocation } from "../../redux/reducers/locationSlice";
+import { setLocation, setCurrentLocation } from "../../redux/reducers/locationSlice";
 import { startLoader, stopLoader } from "../../redux/reducers/loadingSlice";
 
 const Home = () => {
@@ -14,6 +14,7 @@ const Home = () => {
     getLocation().then((loc) => {
       dispatch(stopLoader());
       dispatch(setLocation(loc));
+      dispatch(setCurrentLocation(loc));
     });
   }, []);
 

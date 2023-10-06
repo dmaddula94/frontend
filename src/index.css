@@ -79,3 +79,37 @@ code {
 ::-webkit-scrollbar {
   display: none;
 }
+
+.pac-container {
+  background-color: #fff;
+  color: #000;
+  border-color: #ccc;
+  width: 240px;
+}
+
+.pac-item {
+  border-bottom: 1px solid #ccc;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+/* Dark Mode Styles */
+.dark-mode .pac-container {
+  background-color: #333;
+  color: #fff;
+  border-color: #555;
+}
+
+.dark-mode .pac-item {
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+
+.dark-mode .pac-item-query {
+  color: #fff;
+}
+
+.dark-mode .pac-item:hover {
+  background-color: #555;
+}
