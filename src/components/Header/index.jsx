@@ -1,18 +1,59 @@
-import React from "react";
-import { ToggleButton, Fade, Menu, MenuItem } from "@mui/material";
+import React, { useRef, useState, useCallback } from "react";
+import {
+  ToggleButton,
+  Fade,
+  Menu,
+  MenuItem,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useDispatch, useSelector } from "react-redux";
+import { setLocation } from "../../redux/reducers/locationSlice";
 import { setDarkMode } from "../../redux/reducers/themeSlice";
-import {logout} from "../../redux/reducers/userSlice";
+import { logout } from "../../redux/reducers/userSlice";
 import "./index.scss";
 
 function Header() {
   const dispatch = useDispatch();
+  const location = useSelector((state) => state.location);
+  const sys_theme = useTheme();
   const theme = useSelector((state) => state.theme);
   const user = useSelector((state) => state.user);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchBoxRef = useRef();
+
+  const onPlacesChanged = useCallback(() => {
+    const places = searchBoxRef.current.getPlaces();
+    const place = places[0];
+    if (place) {
+      const {
+        name,
+        geometry: { location },
+      } = place;
+      dispatch(
+        setLocation({
+          latitude: location.lat(),
+          longitude: location.lng(),
+          name: name,
+        })
+      );
+
+      setSearchQuery(name);
+    }
+  }, []);
+
+  const getCurrentLocation = () => {
+    dispatch(setLocation(location.current));
+    setSearchQuery(location.current.name);
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -38,18 +79,41 @@ function Header() {
           />
         </div>
         <div className="right-section">
-          {/* {user.isAuthenticated && (
-            <nav className="navigation">
-              <ul>
-                <li>
-                  <a href="/about">About</a>
-                </li>
-                <li>
-                  <a href="/contact">Contact Us</a>
-                </li>
-              </ul>
-            </nav>
-          )} */}
+          {user.isAuthenticated && (
+            <div className="location-search">
+              <StandaloneSearchBox
+                onLoad={(ref) => (searchBoxRef.current = ref)}
+                onPlacesChanged={onPlacesChanged}
+              >
+                <TextField
+                  fullWidth
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Location"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon
+                          style={{ color: sys_theme.palette.text.primary }}
+                        />
+                      </InputAdornment>
+                    ),
+                    startAdornment: (
+                      <InputAdornment position="end">
+                        <LocationSearchingIcon
+                          style={{
+                            cursor: "pointer",
+                            color: sys_theme.palette.text.primary,
+                          }}
+                          onClick={getCurrentLocation}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </StandaloneSearchBox>
+            </div>
+          )}
           <div className="profile-and-theme">
             {user.isAuthenticated && (
               <>
@@ -78,6 +142,9 @@ function Header() {
                       darkMode: !theme.darkMode,
                     })
                   );
+                }}
+                style={{
+                  borderRadius: "50%",
                 }}
               >
                 {theme.darkMode ? <Brightness7Icon /> : <Brightness4Icon />}

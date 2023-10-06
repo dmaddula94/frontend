@@ -1,0 +1,61 @@
+const dayIcons = {
+  1000: '/icons/clear_day.svg',
+  1001: '/icons/cloudy.svg',
+  1100: '/icons/mostly_clear_day.svg',
+  1101: '/icons/partly_cloudy_day.svg',
+  1102: '/icons/mostly_cloudy.svg',
+  2000: '/icons/fog.svg',
+  2100: '/icons/fog_light.svg',
+  // 3000: "Light Wind",
+  // 3001: "Wind",
+  // 3002: "Strong Wind",
+  4000: '/icons/drizzle.svg',
+  4001: '/icons/rain.svg',
+  4200: '/icons/rain_light.svg',
+  4201: '/icons/rain_heavy.svg',
+  5000: '/icons/snow.svg',
+  5001: '/icons/flurries.svg',
+  5100: '/icons/snow_light.svg',
+  5101: '/icons/snow_heavy.svg',
+  6000: '/icons/freezing_drizzle.svg',
+  6001: '/icons/freezing_rain.svg',
+  6200: '/icons/freezing_rain_light.svg',
+  6201: '/icons/freezing_rain_heavy.svg',
+  7000: '/icons/ice_pellets.svg',
+  7101: '/icons/ice_pellets_heavy.svg',
+  7102: '/icons/ice_pellets_light.svg',
+  8000: '/icons/tstorm.svg'
+};
+
+const nightIcons = {
+  10001: '/icons/clear_night.svg',
+  10011: '/icons/cloudy.svg',
+  11001: '/icons/mostly_clear_night.svg',
+  11011: '/icons/partly_cloudy_night.svg',
+  11021: '/icons/mostly_cloudy.svg',
+  20001: '/icons/fog.svg',
+  21001: '/icons/fog_light.svg',
+  // 30001: "Light Wind",
+  // 30011: "Wind",
+  // 30021: "Strong Wind",
+  40001: '/icons/drizzle.svg',
+  40011: '/icons/rain.svg',
+  42001: '/icons/rain_light.svg',
+  42011: '/icons/rain_heavy.svg',
+  50001: '/icons/snow.svg',
+  50011: '/icons/flurries.svg',
+  51001: '/icons/snow_light.svg',
+  51011: '/icons/snow_heavy.svg',
+  60001: '/icons/freezing_drizzle.svg',
+  60011: '/icons/freezing_rain.svg',
+  62001: '/icons/freezing_rain_light.svg',
+  62011: '/icons/freezing_rain_heavy.svg',
+  70001: '/icons/ice_pellets.svg',
+  71011: '/icons/ice_pellets_heavy.svg',
+  71021: '/icons/ice_pellets_light.svg',
+  80001: '/icons/tstorm.svg'
+};
+
+export async function getIcon(weatherCode, isDay) {
+  return isDay ? dayIcons[weatherCode] : nightIcons[Number(`${weatherCode}1`)] ;
+}
