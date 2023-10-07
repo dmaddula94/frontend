@@ -30,11 +30,11 @@ export const CODES = {
 }
 
 
-const formatObject = (object) => {
+export const formatObject = (object) => {
   const times = object?.time;
   const formated = [];
 
-  times.forEach((time, index) => {
+  times?.forEach((time, index) => {
     const obj = {};
 
     for (const key in object) {

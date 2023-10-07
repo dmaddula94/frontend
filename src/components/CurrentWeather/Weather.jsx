@@ -5,6 +5,7 @@ import Daily from "./Daily";
 import PlaceIcon from '@mui/icons-material/Place';
 import { useTimeline, useForecast } from "../../hooks/use-weather.hook";
 import { addHours, isDayTime } from "../../utils/weather";
+import "./AirQuality";
 
 const now = new Date();
 const startTime = now.toISOString();
@@ -80,6 +81,9 @@ function Weather({ lat, lon, location }) {
         </div>
         <div className="glassbackground current-weather col-5">
           <Daily daily={dailyResponse} isDay={isDay} />
+        </div>
+        <div className="glassbackground current-weather col-5">
+        <div id="map"></div>
         </div>
       </div>
     </>

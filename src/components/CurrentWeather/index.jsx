@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setWeather, setBackground } from "../../redux/reducers/weatherSlice";
 // import { startLoader, stopLoader } from "../../redux/reducers/loadingSlice";
 import "./index.scss";
+// import Weather from "./v2/Weather";
 import Weather from "./Weather";
 import { getCurrentData } from "../../utils/openmeteo";
 
