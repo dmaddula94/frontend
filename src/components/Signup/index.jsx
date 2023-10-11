@@ -53,7 +53,7 @@ function Signup() {
   const [isFormValid, setIsFormValid] = useState(false);
 
   const handleBlur = (validator, value, setter, value2) => {
-    const error = validator(value, value2);
+    const error = validator(value, value2, setter);
     if (validate) {
       setIsFormValid(true);
     } else {
@@ -68,7 +68,7 @@ function Signup() {
     if (!validateFirstName(firstName)) isValid = false;
     if (!validateLastName(lastName)) isValid = false;
     if (!validateEmail(email)) isValid = false;
-    if (!validateMobile(mobile)) isValid = false;
+    if (!validateMobile(mobile, enableAlerts)) isValid = false;
     if (!validatePassword(password)) isValid = false;
     if (!validateConfirmPassword(password, confirmPassword)) isValid = false;
 
@@ -152,10 +152,11 @@ function Signup() {
       <TextField
         error={!!mobileError}
         helperText={mobileError}
-        onBlur={() => handleBlur(validateMobile, mobile, setMobileError)}
+        onBlur={() => handleBlur(validateMobile, mobile, setMobileError, enableAlerts)}
         type="number"
         label="Mobile"
         variant="outlined"
+        required={enableAlerts}
         value={mobile}
         onChange={(e) => setMobile(e.target.value)}
         fullWidth
@@ -167,6 +168,7 @@ function Signup() {
         className="mb-3"
         variant="outlined"
         value={password}
+        required
         onChange={(e) => setPassword(e.target.value)}
         onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
         error={!!passwordError}
@@ -190,6 +192,7 @@ function Signup() {
         label="Confirm Password"
         className="mb-3"
         variant="outlined"
+        required
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         onBlur={() =>

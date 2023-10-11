@@ -30,11 +30,11 @@ export const CODES = {
 }
 
 
-const formatObject = (object) => {
+export const formatObject = (object) => {
   const times = object?.time;
   const formated = [];
 
-  times.forEach((time, index) => {
+  times?.forEach((time, index) => {
     const obj = {};
 
     for (const key in object) {
@@ -120,6 +120,15 @@ export const getCurrentData = async (location) => {
   data.current_weather.weatherbackground = getCurrentWeatherBackground(
     data.current_weather.weathercode,data.current_weather.is_day
   )
+  return data;
+};
+
+export const getHourlyData = async (location) => {
+  const response = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=temperature,apparent_temperature,precipitation,rain,weathercode,visibility,windspeed_10m,temperature_80m,soil_temperature_0cm,uv_index,uv_index_clear_sky,is_day,cape,freezinglevel_height&temperature_unit=fahrenheit&windspeed_unit=mph&forecast_days=1&current_weather=true`
+  );
+  const data = await response.json();
+  data.hourly = formatObject(data.hourly);
   return data;
 };
 

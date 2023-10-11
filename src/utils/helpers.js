@@ -40,9 +40,12 @@ export const validateEmail = (email) => {
 //     }
 //   };
 
-export const validateMobile = (mobile) => {
+export const validateMobile = (mobile, enableAlerts = false) => {
   const mobileRegex = /^[0-9]{10}$/; // Assuming a 10-digit mobile number
   if (!mobile.trim()) {
+    if (enableAlerts) {
+      return "Mobile number is required for alerts";
+    }
     return null;
     // return "Mobile number is required for alerts";
   } else if (!mobileRegex.test(mobile)) {

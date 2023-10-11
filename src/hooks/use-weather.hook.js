@@ -2,6 +2,7 @@ import { useFetch } from "./use-fetch.hook";
 import { createUrl } from "../utils/helpers";
 import timeline from "./mock_timeline.json";
 import forecast from "./mock_forecast.json";
+import {CODES,getCurrentWeatherBackground,formatObject} from "../utils/openmeteo";
 
 const API_URL =
   "https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/tomorrow";
@@ -55,28 +56,69 @@ const useCurrentWeather = ({ lat, lon }) => {
     },
   });
 
-  return useFetch({ url });
+  const [forecastResponse, forecastLoading, forecastHasError] = useFetch({ url });
+
+  if (!forecastLoading && forecastResponse) {
+    forecastResponse.current_weather.temperature = Math.round(
+      forecastResponse.current_weather.temperature
+    )
+    forecastResponse.current_weather.weatherstate = CODES[forecastResponse.current_weather.weathercode];
+    forecastResponse.current_weather.weatherbackground = getCurrentWeatherBackground(
+      forecastResponse.current_weather.weathercode,forecastResponse.current_weather.is_day
+    )
+  }
+
+  return [forecastResponse, forecastLoading, forecastHasError];
 };
 
-const useForecastWeather = ({ lat, lon }) => {
+const useHourlyWeather = ({ lat, lon }) => {
+  const url = createUrl({
+    url: `${OPEN_METEO_URL}`,
+    query: {
+      latitude: lat,
+      longitude: lon,
+      temperature_unit: "fahrenheit",
+      windspeed_unit: "mph",
+      forecast_days: "1",
+      hourly: "temperature,apparent_temperature,precipitation,rain,weathercode,visibility,windspeed_10m,temperature_80m,soil_temperature_0cm,uv_index,uv_index_clear_sky,is_day,cape,freezinglevel_height"
+    },
+  });
+
+  const [forecastResponse, forecastLoading, forecastHasError] = useFetch({ url });
+
+  if (!forecastLoading && forecastResponse) {
+    forecastResponse.hourly = formatObject(forecastResponse.hourly);
+  }
+
+  return [forecastResponse, forecastLoading, forecastHasError];
+};
+
+const useDailyWeather = ({ lat, lon }) => {
     const url = createUrl({
       url: `${OPEN_METEO_URL}`,
       query: {
         latitude: lat,
         longitude: lon,
-        hourly:
-          "temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_80m,windspeed_120m,windspeed_180m,winddirection_10m,winddirection_80m,winddirection_120m,winddirection_180m,windgusts_10m,temperature_80m,temperature_120m,temperature_180m,soil_temperature_0cm,soil_temperature_6cm,soil_temperature_18cm,soil_temperature_54cm,soil_moisture_0_1cm,soil_moisture_1_3cm,soil_moisture_3_9cm,soil_moisture_9_27cm,soil_moisture_27_81cm",
-        daily:
-          "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration",
-        current_weather: "true",
+        // hourly:
+        //   "temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_80m,windspeed_120m,windspeed_180m,winddirection_10m,winddirection_80m,winddirection_120m,winddirection_180m,windgusts_10m,temperature_80m,temperature_120m,temperature_180m,soil_temperature_0cm,soil_temperature_6cm,soil_temperature_18cm,soil_temperature_54cm,soil_moisture_0_1cm",
+        // daily:
+        //   "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration",
+        daily: "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max",
+        // current_weather: "true",
         temperature_unit: "fahrenheit",
         windspeed_unit: "mph",
         timezone: "America/New_York",
-        forecast_days: "16",
+        forecast_days: "14"
       },
     });
   
-    return useFetch({ url });
+    const [forecastResponse, forecastLoading, forecastHasError] = useFetch({ url });
+
+    if (!forecastLoading && forecastResponse) {
+      forecastResponse.daily = formatObject(forecastResponse.daily);
+    }
+  
+    return [forecastResponse, forecastLoading, forecastHasError];
   };
 
-export { useTimeline, useForecast, useCurrentWeather, useForecastWeather };
+export { useTimeline, useForecast, useCurrentWeather, useHourlyWeather, useDailyWeather };
