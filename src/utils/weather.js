@@ -55,6 +55,37 @@ export const getCurrentWeather = async (location) => {
   });
 };
 
+export const getTimelineData = async (
+  lat,
+  lon,
+  startTime,
+  endTime,
+) => {
+  return new Promise(async (resolve, reject) => {
+    const endpoint = `https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/tomorrow/timelines?location=${lat},${lon}&units=imperial&timesteps=current,1h&startTime=${startTime}&endTime=${endTime}&fields=precipitationIntensity,temperature,temperatureApparent,weatherCode`;
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+  });
+};
+
+export const getForecastData = async (lat, lon) => {
+  return new Promise(async (resolve, reject) => {
+    const endpoint = `https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/tomorrow/weather/forecast?location=${lat},${lon}&units=imperial&timesteps=1d`;
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+  });
+};
+
 export async function isDayTime(latitude, longitude) {
   try {
     const response = await fetch(
