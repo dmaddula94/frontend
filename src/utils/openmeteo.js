@@ -152,7 +152,7 @@ export const getHourlyData = async (location) => {
 export const getWeatherData = async (location) => {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,rain,snowfall,snow_depth,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FNew_York&current_weather=true&forecast_days=16`
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=visibility,uv_index,temperature_2m,apparent_temperature,precipitation_probability,precipitation,rain,snowfall,snow_depth,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FNew_York&current_weather=true&forecast_days=16`
     );
     const data = await response.json();
     data.current_weather.temperature = Math.round(

@@ -30,14 +30,18 @@ export default function Hourly({ hourly, isDay }) {
     <div key="hourly" className="hourly">
       {hourly?.map((hour, index) => (
         <div key={index} className="hour">
-          <div key="hour-time" className="hour-time">
-            {formatTime(hour.time)}
-          </div>
-          <div key="hour-icon" className="hour-icon">
-            <WeatherIcon value={hour.weathercode} isDay={isDay} />
-          </div>
-          <div key="hour-temp" className="hour-temp">
-            <Temp value={Math.round(hour.temperature_2m)} />°
+          <div className="aspect-ratio-box">
+            <div className="aspect-ratio-box-content">
+              <div key="hour-time" className="hour-time">
+                {formatTime(hour.time)}
+              </div>
+              <div key="hour-icon" className="hour-icon">
+                <WeatherIcon value={hour.weathercode} isDay={isDay} />
+              </div>
+              <div key="hour-temp" className="hour-temp">
+                <Temp value={Math.round(hour.temperature_2m)} />°
+              </div>
+            </div>
           </div>
         </div>
       ))}
