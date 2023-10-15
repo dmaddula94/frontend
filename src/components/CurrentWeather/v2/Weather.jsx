@@ -259,7 +259,7 @@ function Weather({ lat, lon, location }) {
             </div>
             <div className="right-section col-5">
               <div className="glassbackground current-weather">
-                <Daily daily={dailyResponse} isDay={realtimeResponse?.is_day} />
+                <Daily daily={dailyResponse} hourly={hourlyResponse} isDay={realtimeResponse?.is_day} />
               </div>
             </div>
           </Box>

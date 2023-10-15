@@ -1,6 +1,7 @@
 import React from "react";
 import { formatDay, prettyPrintWeatherCode } from "../../../utils/weather";
 import Temp from "./Temp";
+import Hourly from './Hourly'
 import WeatherIcon from "./WeatherIcon";
 import { useDailyWeather } from "../../../hooks/use-weather.hook";
 
@@ -12,7 +13,8 @@ function Error() {
   return <div>Oops! Something went wrong :(</div>;
 }
 
-const DayForecast = ({ dayData, isDay, maxTemp, minTemp }) => {
+const DayForecast = ({ dayData, isDay, maxTemp, minTemp, hourly, daySelected, openHourlyData }) => {
+
   const calculatePercentage = (value, min, max) => {
     return ((value - min) / (max - min)) * 100;
   };
@@ -24,38 +26,43 @@ const DayForecast = ({ dayData, isDay, maxTemp, minTemp }) => {
   );
 
   return (
-    <div className="day">
-      <p className="day-time">
-        {new Date(dayData.time).toLocaleDateString('en-US', { weekday: 'long' })}  {/* updated */}
-      </p>
-      <div className="day-icon">
-        <WeatherIcon value={dayData.weathercode} isDay={isDay} />  {/* updated */}
-      </div>
-      <p className="day-temp">
-        <Temp value={dayData.temperature_2m_min} />°  {/* updated */}
-      </p>
-      <div
-        className="temperature-bar"
-        style={{
-          background: `linear-gradient(90deg, #9bdccc ${
-            gradientPercentage - 10
-          }%, 
+    <>
+      <div className="day" style={{ cursor: 'pointer' }} onClick={() => openHourlyData(dayData.time)}>
+        <p className="day-time">
+          {new Date(dayData.time).toLocaleDateString('en-US', { weekday: 'long' })}  {/* updated */}
+        </p>
+        <div className="day-icon">
+          <WeatherIcon value={dayData.weathercode} isDay={isDay} />  {/* updated */}
+        </div>
+        <p className="day-temp">
+          <Temp value={dayData.temperature_2m_min} />°  {/* updated */}
+        </p>
+        <div
+          className="temperature-bar"
+          style={{
+            background: `linear-gradient(90deg, #9bdccc ${gradientPercentage - 10
+              }%, 
         #ffffed ${gradientPercentage}%, 
         #f1807e ${gradientPercentage + 10}%)`,
-        }}
-      ></div>
-      <p className="day-temp">
-        <Temp value={dayData.temperature_2m_max} />°  {/* updated */}
-      </p>
-      <p className="day-description">
-        {prettyPrintWeatherCode(dayData.weathercode)}  {/* updated */}
-      </p>
-    </div>
+          }}
+        ></div>
+        <p className="day-temp">
+          <Temp value={dayData.temperature_2m_max} />°  {/* updated */}
+        </p>
+        <p className="day-description">
+          {prettyPrintWeatherCode(dayData.weathercode)}  {/* updated */}
+        </p>
+      </div>
+      {(daySelected === dayData.time) && (<Hourly
+        hourly={hourly}
+        isDay={isDay}
+      />)}
+    </>
   );
 };
 
 
-export default function Daily({ daily, isDay }) {
+export default function Daily({ daily, isDay, hourly }) {
   // const [dailyResponse, dailyLoading, dailyHasError] = useDailyWeather({
   //   lat,
   //   lon,
@@ -68,6 +75,14 @@ export default function Daily({ daily, isDay }) {
   // if (dailyHasError) {
   //   return <Error />;
   // }
+
+  const [daySelected, setDaySelected] = React.useState("");
+
+
+  const openHourlyData = (selectedDate) => {
+    setDaySelected(selectedDate)
+  }
+
   const maxTemp = Math.max(...daily?.map((day) => day?.temperature_2m_max));
   const minTemp = Math.min(...daily?.map((day) => day?.temperature_2m_min));
   return (
@@ -79,6 +94,9 @@ export default function Daily({ daily, isDay }) {
           isDay={isDay}
           maxTemp={maxTemp}
           minTemp={minTemp}
+          hourly={hourly}
+          daySelected={daySelected}
+          openHourlyData={openHourlyData}
         />
         // <div key={index} className="day">
         //     <div key="day-time" className="day-time">
