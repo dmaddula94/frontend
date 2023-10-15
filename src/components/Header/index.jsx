@@ -7,6 +7,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
@@ -17,6 +18,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useDispatch, useSelector } from "react-redux";
 import { setLocation } from "../../redux/reducers/locationSlice";
 import { setDarkMode } from "../../redux/reducers/themeSlice";
+import { setBackground } from "../../redux/reducers/weatherSlice";
 import { logout } from "../../redux/reducers/userSlice";
 import "./index.scss";
 
@@ -24,6 +26,8 @@ function Header() {
   const dispatch = useDispatch();
   const location = useSelector((state) => state.location);
   const sys_theme = useTheme();
+  const navigate = useNavigate();
+  const routeLocation = useLocation();
   const theme = useSelector((state) => state.theme);
   const user = useSelector((state) => state.user);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -63,10 +67,24 @@ function Header() {
     setAnchorEl(null);
   };
 
+  const redirectToProfile = () => {
+    dispatch(setBackground({ background: 'default' }));
+    handleClose();
+    navigate("/profile");
+  };
+
   const handleLogout = () => {
     setAnchorEl(null);
+    sessionStorage.clear();
     dispatch(logout());
   };
+
+
+  const redirectToHomePage = () => {
+    navigate("/")
+  }
+
+  const isHomeRoute = routeLocation.pathname === "/";
 
   return (
     <header className={`header ${theme.darkMode ? "dark" : "light"}`}>
@@ -75,7 +93,11 @@ function Header() {
           <img
             src={`${theme.darkMode ? "/logo.svg" : "/logo-dark.svg"}`}
             alt="Marist Weather Dashboard Logo"
-            className="logo"
+            className="logo mou"
+            onClick={!isHomeRoute ? redirectToHomePage : () => null}
+            style={{
+              cursor: isHomeRoute ? "auto" : "pointer"
+            }}
           />
         </div>
         <div className="right-section">
@@ -127,7 +149,7 @@ function Header() {
                   open={Boolean(anchorEl)}
                   onClose={handleClose}
                 >
-                  <MenuItem onClick={handleClose}>Profile</MenuItem>
+                  <MenuItem onClick={redirectToProfile}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
               </>

@@ -1,9 +1,9 @@
 import React from 'react';
 import Temp from "./Temp";
 import WeatherIcon from "./WeatherIcon";
-import {prettyPrintWeatherCode} from "../../utils/weather";
+import { prettyPrintWeatherCode } from "../../utils/weather";
 
-export default function Realtime({ realtime, isDay }) {
+export default function Realtime({ realtime, isDay, showWeatherIcon = true }) {
     return (
         <div className="realtime">
             <div className="realtime-temp"><Temp value={realtime.intervals[0].values.temperature} /></div>
@@ -13,7 +13,7 @@ export default function Realtime({ realtime, isDay }) {
                 <div className="realtime-feels-like">Feels Like <Temp value={realtime.intervals[0].values.temperatureApparent} />°</div>
             </div>
             <div className="realtime-icon">
-                <WeatherIcon value={realtime.intervals[0].values.weatherCode} isDay={isDay} />
+                {showWeatherIcon && <WeatherIcon value={realtime.intervals[0].values.weatherCode} isDay={isDay} />}
             </div>
         </div>
     );

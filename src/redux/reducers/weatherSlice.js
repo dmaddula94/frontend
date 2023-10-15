@@ -2,7 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   current: null,
-  background: 'default'
+  background: 'default',
+  favoriteLocationsList: []
 };
 
 export const weatherSlice = createSlice({
@@ -14,10 +15,13 @@ export const weatherSlice = createSlice({
     },
     setBackground: (state, action) => {
       state.background = action.payload.background
+    },
+    setFavoriteLocationsList: (state, action) => {
+      state.favoriteLocationsList = [...state.favoriteLocationsList, action.payload.favoriteLocationsList]
     }
   }
 });
 
-export const { setWeather, setBackground } = weatherSlice.actions;
+export const { setWeather, setBackground, setFavoriteLocationsList } = weatherSlice.actions;
 
 export default weatherSlice.reducer;

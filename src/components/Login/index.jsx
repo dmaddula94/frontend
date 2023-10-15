@@ -44,6 +44,7 @@ function Login() {
         dispatch(
           login({ user: response.data, token: response.data.token })
         );
+        sessionStorage.setItem("email", response.data.email)
         navigate("/");
       } else {
         console.error("Failed to login");
