@@ -86,6 +86,7 @@ function Weather({ lat, lon, location }) {
   const [dailyResponse, setDailyResponse] = React.useState(null);
   const [hourlyResponse, setHourlyResponse] = React.useState(null);
   const [currentHourData, setCurrentHourData] = React.useState({});
+  const [fullData, setFullData] = React.useState({});
 
   function getCurrentHourlyData(data) {
     // Get the current date and hour
@@ -103,13 +104,49 @@ function Weather({ lat, lon, location }) {
     return null;
   }
 
+  function getCurrentDayData(data, date = new Date().toISOString()) {
+    const currentDate = new Date(date).toISOString().substring(0, 10);
+    const arr = [];
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].time.substring(0, 10) === currentDate) {
+        arr.push(data[i]);
+      }
+    }
+    return arr;
+  }
+
+  function getCurrentDayRemainingHourlyData(data) {
+    // Get the current date and hour in ISO format
+    const currentDate = new Date();
+    const currentISO = currentDate.toISOString();
+    const currentDay = currentISO.substring(0, 10);
+    const currentHour = parseInt(currentISO.substring(11, 13), 10);
+  
+    // Search for the hourly data for the current day from the current hour to the end
+    const remainingData = [];
+    for (let i = 0; i < data.length; i++) {
+      const dataDate = data[i].time.substring(0, 10);
+      const dataHour = parseInt(data[i].time.substring(11, 13), 10);
+      if (dataDate === currentDay && dataHour >= currentHour) {
+        remainingData.push(data[i]);
+      }
+    }
+  
+    // If no data is found for the current day from now to end, return null
+    return remainingData.length > 0 ? remainingData : null;
+  }
+  
+  
+
   const weatherData = async (lat, lon) => {
     try {
       const response = await getWeatherData({ latitude: lat, longitude: lon });
+      setFullData(response);
       setRealtimeResponse(response.current_weather);
-      setHourlyResponse(response.hourly);
+      setHourlyResponse(getCurrentDayData(response.hourly));
       setDailyResponse(response.daily);
       setCurrentHourData(getCurrentHourlyData(response.hourly));
+      console.log(getCurrentDayRemainingHourlyData(response.hourly));
     } catch (error) {
       console.error("Error fetching weather data:", error);
     }
@@ -259,7 +296,7 @@ function Weather({ lat, lon, location }) {
             </div>
             <div className="right-section col-5">
               <div className="glassbackground current-weather">
-                <Daily daily={dailyResponse} hourly={hourlyResponse} isDay={realtimeResponse?.is_day} />
+                <Daily daily={dailyResponse} hourly={fullData.hourly} isDay={realtimeResponse?.is_day} />
               </div>
             </div>
           </Box>
