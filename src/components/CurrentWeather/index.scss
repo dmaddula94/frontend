@@ -46,12 +46,32 @@
 
 .hour {
     text-align: center;
-    margin: 0 14px;
     // color: var(--blackish);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+
+    flex-shrink: 0;
+    width: 120px;
+    position: relative;
+}
+
+.aspect-ratio-box {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* for 1:1 aspect ratio */
+    overflow: hidden;
+}
+
+.aspect-ratio-box-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .day {
@@ -60,6 +80,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    cursor: pointer;
 }
 
 .hour:first-child {
@@ -166,5 +187,11 @@
 
 p {
     margin: 0;
+}
+
+.forcast {
+    display: flex;
+    text-align: center;
+    justify-content: flex-start;
 }
 

@@ -1,24 +1,33 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import Realtime from "./Realtime";
 import Hourly from "./Hourly";
 import Daily from "./Daily";
 import PlaceIcon from '@mui/icons-material/Place';
+import IconButton from '@mui/material/IconButton';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Typography } from "@mui/material";
 import { useTimeline, useForecast } from "../../hooks/use-weather.hook";
 import { addHours, isDayTime } from "../../utils/weather";
 import { Box } from "@mui/material";
-import {getHourlyData} from "../../utils/openmeteo";
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import { getHourlyData } from "../../utils/openmeteo";
 import { animated, useSpring } from 'react-spring';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import Brightness5Icon from '@mui/icons-material/Brightness5';
 import { getTimelineData, getForecastData } from "../../utils/weather";
+import { setFavoriteLocationsList } from "../../redux/reducers/weatherSlice";
+import { updateLocations } from "../../redux/reducers/userSlice";
+import api from "../../api";
 // import "./AirQuality";
 
 const now = new Date();
 const startTime = now.toISOString();
-const endTime = addHours({ date: now, hours: 6 }).toISOString();
+const endTime = addHours({ date: now, hours: 12 }).toISOString();
 
 function Loading() {
   return <div>Loading...</div>;
@@ -26,6 +35,60 @@ function Loading() {
 
 function Error() {
   return <div>Oops! Something went wrong :(</div>;
+}
+
+function FavoriteButton() {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const location = useSelector((state) => state.location);
+  const [isFavorite, setIsFavorite] = React.useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = React.useState(false);
+
+  const isLocationAddedToList = () => {
+    const { locations } = user.user;
+    const isLocationAdded = locations.find((list) => {
+      if (list.name === location.name) {
+        return true;
+      }
+    })
+    return isLocationAdded ? true : false;
+  }
+
+  const addToFavoriteList = async () => {
+    const { name, latitude, longitude } = location;
+    const response = await api.post('/userLocation', {
+      email: user.user.email,
+      location: {
+        name,
+        latitude,
+        longitude
+      }
+    });
+    setIsFavorite(!isFavorite);
+    setIsButtonDisabled(true);
+    dispatch(updateLocations({ user: response.data }))
+    dispatch(setFavoriteLocationsList({
+      favoriteLocationsList: {
+        name,
+        latitude,
+        longitude
+      }
+    }))
+  };
+
+  React.useEffect(() => {
+    const isAdded = isLocationAddedToList();
+    setIsFavorite(isAdded)
+    setIsButtonDisabled(isAdded)
+  }, [location.latitude, location.longitude])
+
+  return (
+    <IconButton
+      disabled={isButtonDisabled}
+    >
+      {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon onClick={addToFavoriteList} />}
+    </IconButton>
+  );
 }
 
 function Weather({ lat, lon, location }) {
@@ -90,6 +153,7 @@ function Weather({ lat, lon, location }) {
       );
       setRealtimeResponse(resp.data.timelines[1]);
       setHourlyResponse(resp.data.timelines[0]);
+
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
@@ -111,25 +175,25 @@ function Weather({ lat, lon, location }) {
 
     // Search for the hourly data for the current hour
     for (let i = 0; i < data.hourly.length; i++) {
-        if (data.hourly[i].time === currentHour) {
-            return data.hourly[i];
-        }
+      if (data.hourly[i].time === currentHour) {
+        return data.hourly[i];
+      }
     }
 
     // If no data is found for the current hour, return null
     return null;
-}
+  }
 
-function metersToMiles(meters) {
-  const conversionFactor = 1 / 1609.344;
-  return Math.round(meters * conversionFactor);
-}
+  function metersToMiles(meters) {
+    const conversionFactor = 1 / 1609.344;
+    return Math.round(meters * conversionFactor);
+  }
 
-// Now currentHourlyData contains the hourly data for the current hour, or null if no data was found
+  // Now currentHourlyData contains the hourly data for the current hour, or null if no data was found
 
 
   const getCurrentWeatherData = async () => {
-    const weatherdata = await getHourlyData({latitude: lat, longitude: lon});
+    const weatherdata = await getHourlyData({ latitude: lat, longitude: lon });
     setCurrentHourData(getCurrentHourlyData(weatherdata));
   };
 
@@ -153,66 +217,74 @@ function metersToMiles(meters) {
     }
   };
 
-
   return (
     <>
       {
         realtimeResponse && hourlyResponse && dailyResponse && (
           <Box className="weather row">
-          <div className="left-section col-5">
-          <div className="glassbackground current-weather">
-            <div className="time">{now.toDateString()}</div>
-            <div className="location" style={{display: 'flex', alignItems: 'center'}}>
-              <PlaceIcon width="16" height="16" style={{marginRight: '4px'}} />
-              {location}
-            </div>
-            <Realtime realtime={realtimeResponse} isDay={isDay} />
-            <div className="divider" />
-            <Hourly hourly={hourlyResponse} isDay={isDay} />
-          </div>
-  
-          <div style={{ display: 'flex', gap: '4px', textAlign: 'center' }}>
-        <div className="glassbackground current-weather col-4">
-          <Typography variant="h6" style={{marginBottom: '12px', textAlign: 'center'}}>
-            <Brightness5Icon /> 
-            <p>UV Index</p>
-          </Typography>
-          <animated.div style={props}>
-            <Typography>{`${currentHourData?.uv_index} - ${getUVIndexLabel(currentHourData?.uv_index)}`}</Typography>
-            <Typography variant="subtitle1"></Typography>
-          </animated.div>
-        </div>
-        <div className="glassbackground current-weather col-4">
-          <Typography variant="h6" style={{marginBottom: '12px', textAlign: 'center'}}>
-            <VisibilityIcon />
-            <p>Visibility</p>
-          </Typography>
-          <animated.div style={props}>
-            <Typography>{`${metersToMiles(currentHourData?.visibility)} mi`}</Typography>
-          </animated.div>
-        </div>
-        <div className="glassbackground current-weather col-4">
-          <Typography variant="h6" style={{marginBottom: '12px', textAlign: 'center'}}>
-            <OpacityIcon />
-            <p>Percipitation</p>
-          </Typography>
-          <animated.div style={props}>
-            <Typography>{currentHourData?.precipitation}</Typography>
-          </animated.div>
-        </div>
-      </div>
-  
-          {/* <div className="glassbackground current-weather">
+            <div className="left-section col-5">
+              <div className="glassbackground current-weather">
+                <div style={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }} className="d-flex">
+                  <div className="time">{now.toDateString()}</div>
+                  <FavoriteButton />
+                </div>
+                <div className="location" style={{ display: 'flex', alignItems: 'center' }}>
+                  <PlaceIcon width="16" height="16" style={{ marginRight: '4px' }} />
+                  {location}
+                </div>
+                <Realtime realtime={realtimeResponse} isDay={isDay} />
+                <div className="divider" />
+                <div className="forcast">
+                  <ScheduleIcon style={{ marginRight: '5px' }} />12-hour forcast
+                </div>
+                <Hourly hourly={hourlyResponse} isDay={isDay} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '4px', textAlign: 'center' }}>
+                <div className="glassbackground current-weather col-4">
+                  <Typography variant="h6" style={{ marginBottom: '12px', textAlign: 'center' }}>
+                    <Brightness5Icon />
+                    <p>UV Index</p>
+                  </Typography>
+                  <animated.div style={props}>
+                    <Typography>{`${currentHourData?.uv_index} - ${getUVIndexLabel(currentHourData?.uv_index)}`}</Typography>
+                    <Typography variant="subtitle1"></Typography>
+                  </animated.div>
+                </div>
+                <div className="glassbackground current-weather col-4">
+                  <Typography variant="h6" style={{ marginBottom: '12px', textAlign: 'center' }}>
+                    <VisibilityIcon />
+                    <p>Visibility</p>
+                  </Typography>
+                  <animated.div style={props}>
+                    <Typography>{`${metersToMiles(currentHourData?.visibility)} mi`}</Typography>
+                  </animated.div>
+                </div>
+                <div className="glassbackground current-weather col-4">
+                  <Typography variant="h6" style={{ marginBottom: '12px', textAlign: 'center' }}>
+                    <OpacityIcon />
+                    <p>Percipitation</p>
+                  </Typography>
+                  <animated.div style={props}>
+                    <Typography>{currentHourData?.precipitation}</Typography>
+                  </animated.div>
+                </div>
+              </div>
+
+              {/* <div className="glassbackground current-weather">
           <div id="map"></div>
           </div> */}
-          </div>
-          <div className="right-section col-5">
-          <div className="glassbackground current-weather">
-            <Daily daily={dailyResponse} isDay={isDay} />
-          </div>
-          </div>
-        
-        </Box>
+            </div>
+            <div className="right-section col-5">
+              <div className="glassbackground current-weather">
+                <Daily daily={dailyResponse} isDay={isDay} />
+              </div>
+            </div>
+
+          </Box>
         )
       }
     </>

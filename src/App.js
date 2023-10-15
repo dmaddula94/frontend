@@ -14,6 +14,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Loader from "./Loader";
 import Home from "./components/Home";
+import Profile from "./components/Profile";
 import Footer from "./components/Footer";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
@@ -31,7 +32,7 @@ function App() {
   React.useEffect(() => {
     document.body.className = ''; // Clear any existing classes
     document.body.classList.add(`${theme.darkMode ? "dark-mode" : "light-mode"}`); // Add the current theme as a class
-}, [theme]);
+  }, [theme]);
 
 
   return (
@@ -59,6 +60,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
                     </ProtectedRoute>
                   }
                 />

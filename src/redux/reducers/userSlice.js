@@ -20,9 +20,12 @@ const userSlice = createSlice({
       state.user = null;
       state.token = null;
     },
+    updateLocations(state, action){
+      state.user = action.payload.user;
+    }
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, updateLocations } = userSlice.actions;
 
 export default userSlice.reducer;
