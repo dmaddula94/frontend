@@ -18,21 +18,21 @@ const DayForecast = ({ dayData, isDay, maxTemp, minTemp }) => {
   };
 
   const gradientPercentage = calculatePercentage(
-    dayData.values.temperatureAvg,
+    dayData.temperature_2m_max,  // updated
     minTemp,
     maxTemp
   );
 
   return (
     <div className="day">
-      <p key="day-time" className="day-time">
-        {formatDay(dayData.time)}
+      <p className="day-time">
+        {new Date(dayData.time).toLocaleDateString('en-US', { weekday: 'long' })}  {/* updated */}
       </p>
-      <div key="day-icon" className="day-icon">
-        <WeatherIcon value={dayData.weathercode} isDay={isDay} />
+      <div className="day-icon">
+        <WeatherIcon value={dayData.weathercode} isDay={isDay} />  {/* updated */}
       </div>
-      <p key="day-temp-min" className="day-temp">
-        <Temp value={dayData.values.temperature_2m_min} />°
+      <p className="day-temp">
+        <Temp value={dayData.temperature_2m_min} />°  {/* updated */}
       </p>
       <div
         className="temperature-bar"
@@ -44,43 +44,35 @@ const DayForecast = ({ dayData, isDay, maxTemp, minTemp }) => {
         #f1807e ${gradientPercentage + 10}%)`,
         }}
       ></div>
-      {/* <div
-        className="temperature-bar"
-        style={{
-          background: `linear-gradient(90deg, #9bdccc, 
-                    ${gradientPercentage}%,
-                    yellow ${gradientPercentage}%, 
-                    red ${gradientPercentage + 1}%)`,
-        }}
-      ></div> */}
-      <p key="day-temp-max" className="day-temp">
-        <Temp value={dayData.temperature_2m_max} />°
+      <p className="day-temp">
+        <Temp value={dayData.temperature_2m_max} />°  {/* updated */}
       </p>
-      <p key="day-description" className="day-description">
-        {prettyPrintWeatherCode(dayData.weathercode)}
+      <p className="day-description">
+        {prettyPrintWeatherCode(dayData.weathercode)}  {/* updated */}
       </p>
     </div>
   );
 };
 
-export default function Daily({ lat, lon, isDay }) {
-  const [dailyResponse, dailyLoading, dailyHasError] = useDailyWeather({
-    lat,
-    lon,
-  });
 
-  if (dailyLoading) {
-    return <Loading />;
-  }
+export default function Daily({ daily, isDay }) {
+  // const [dailyResponse, dailyLoading, dailyHasError] = useDailyWeather({
+  //   lat,
+  //   lon,
+  // });
 
-  if (dailyHasError) {
-    return <Error />;
-  }
-  const maxTemp = Math.max(...dailyResponse.daily.map((day) => day.temperature_2m_max));
-  const minTemp = Math.min(...dailyResponse.daily.map((day) => day.temperature_2m_min));
+  // if (dailyLoading) {
+  //   return <Loading />;
+  // }
+
+  // if (dailyHasError) {
+  //   return <Error />;
+  // }
+  const maxTemp = Math.max(...daily?.map((day) => day?.temperature_2m_max));
+  const minTemp = Math.min(...daily?.map((day) => day?.temperature_2m_min));
   return (
     <div key="daily" className="daily">
-      {dailyResponse.daily.map((day, index) => (
+      {daily?.map((day, index) => (
         <DayForecast
           key={index}
           dayData={day}

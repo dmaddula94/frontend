@@ -12,23 +12,23 @@ function Error() {
   return <div>Oops! Something went wrong :(</div>;
 }
 
-export default function Hourly({ lat, lon, isDay }) {
-  const [hourlyResponse, hourlyLoading, hourlyHasError] = useHourlyWeather({
-    lat,
-    lon,
-  });
+export default function Hourly({ hourly, isDay }) {
+  // const [hourlyResponse, hourlyLoading, hourlyHasError] = useHourlyWeather({
+  //   lat,
+  //   lon,
+  // });
 
-  if (hourlyLoading) {
-    return <Loading />;
-  }
+  // if (hourlyLoading) {
+  //   return <Loading />;
+  // }
 
-  if (hourlyHasError) {
-    return <Error />;
-  }
+  // if (hourlyHasError) {
+  //   return <Error />;
+  // }
 
   return (
     <div key="hourly" className="hourly">
-      {hourlyResponse?.hourly.map((hour, index) => (
+      {hourly?.map((hour, index) => (
         <div key={index} className="hour">
           <div key="hour-time" className="hour-time">
             {formatTime(hour.time)}
@@ -37,7 +37,7 @@ export default function Hourly({ lat, lon, isDay }) {
             <WeatherIcon value={hour.weathercode} isDay={isDay} />
           </div>
           <div key="hour-temp" className="hour-temp">
-            <Temp value={Math.round(hour.temperature)} />°
+            <Temp value={Math.round(hour.temperature_2m)} />°
           </div>
         </div>
       ))}

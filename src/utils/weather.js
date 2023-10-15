@@ -55,34 +55,29 @@ export const getCurrentWeather = async (location) => {
   });
 };
 
-export const getTimelineData = async (
-  lat,
-  lon,
-  startTime,
-  endTime,
-) => {
+export const getTimelineData = async (lat, lon, startTime, endTime) => {
   return new Promise(async (resolve, reject) => {
     const endpoint = `https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/tomorrow/timelines?location=${lat},${lon}&units=imperial&timesteps=current,1h&startTime=${startTime}&endTime=${endTime}&fields=precipitationIntensity,temperature,temperatureApparent,weatherCode`;
-      try {
-        const response = await fetch(endpoint);
-        const data = await response.json();
-        resolve(data);
-      } catch (err) {
-        reject(err);
-      }
+    try {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      resolve(data);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 
 export const getForecastData = async (lat, lon) => {
   return new Promise(async (resolve, reject) => {
     const endpoint = `https://us-central1-marist-weather-dashboard.cloudfunctions.net/api/tomorrow/weather/forecast?location=${lat},${lon}&units=imperial&timesteps=1d`;
-      try {
-        const response = await fetch(endpoint);
-        const data = await response.json();
-        resolve(data);
-      } catch (err) {
-        reject(err);
-      }
+    try {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      resolve(data);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 
@@ -125,11 +120,7 @@ export const getDefinedState = async (code, latitude, longitude) => {
   const isDay = await isDayTime(latitude, longitude);
   const weatherCode = code.toString();
 
-  if (
-    ["1000", "1100", "2000", "2100"].includes(
-      weatherCode
-    )
-  ) {
+  if (["1000", "1100", "2000", "2100"].includes(weatherCode)) {
     if (isDay) {
       return "clear_day";
     } else {
@@ -137,11 +128,7 @@ export const getDefinedState = async (code, latitude, longitude) => {
     }
   }
 
-  if (
-    ["1101", "1102", "1001"].includes(
-      weatherCode
-    )
-  ) {
+  if (["1101", "1102", "1001"].includes(weatherCode)) {
     if (isDay) {
       return "cloudy_day";
     } else {
@@ -214,8 +201,8 @@ export const formatTime = (time) => {
 };
 
 export const formatDay = (time) => {
-    const date = new Date(time);
-    return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+  const date = new Date(time);
+  return date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
 };
 
 /**
@@ -253,6 +240,34 @@ export const prettyPrintWeatherCode = (code) => {
     7101: "Heavy Ice Pellets",
     7102: "Light Ice Pellets",
     8000: "Thunderstorm",
+    // Additional descriptions with same values
+    1: "Clear",
+    2: "Cloudy",
+    3: "Mostly Clear",
+    45: "Fog",
+    48: "Light Fog",
+    51: "Drizzle",
+    53: "Rain",
+    55: "Light Rain",
+    56: "Freezing Drizzle",
+    57: "Freezing Rain",
+    61: "Light Freezing Rain",
+    63: "Heavy Freezing Rain",
+    65: "Snow",
+    66: "Flurries",
+    67: "Light Snow",
+    71: "Heavy Snow",
+    73: "Freezing Drizzle",
+    75: "Freezing Rain",
+    77: "Light Freezing Rain",
+    80: "Heavy Freezing Rain",
+    81: "Ice Pellets",
+    82: "Heavy Ice Pellets",
+    85: "Light Ice Pellets",
+    86: "Thunderstorm",
+    95: "Clear", // Placeholder, adjust as needed
+    96: "Cloudy", // Placeholder, adjust as needed
+    99: "Mostly Clear", // Placeholder, adjust as needed
   };
-  return weatherCodes[code.toString()];
+  return weatherCodes[code];
 };
