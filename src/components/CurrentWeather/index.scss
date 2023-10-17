@@ -53,7 +53,7 @@
     justify-content: space-between;
 
     flex-shrink: 0;
-    width: 120px;
+    width: 18%;
     position: relative;
 }
 
@@ -95,6 +95,24 @@
     width: 40px;
     height: 40px;
     margin: 6px 0;
+}
+
+.hour-time, .hour-temp {
+    font-size: small;
+}
+
+.daily {
+    .hourly-container {
+        padding: 18px;
+    }
+    .hour-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .day-description {
+        font-size: small;
+    }
 }
 
 @media only screen and (max-width: 768px) {
@@ -166,7 +184,7 @@
     // position: relative;
     border-radius: 5px;
     overflow: hidden;
-    width: 45%;
+    width: 150px;
 }
 
 .high-temp {
@@ -193,5 +211,6 @@ p {
     display: flex;
     text-align: center;
     justify-content: flex-start;
+    margin-bottom: 12px;
 }
 

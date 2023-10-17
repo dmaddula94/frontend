@@ -13,11 +13,11 @@ export const getLocationCords = () => {
   });
 };
 
-export const getLocation = async (coOrdinates) => {
-  if (!coOrdinates) {
-    coOrdinates = await getLocationCords();
+export const getLocation = async (coordinates) => {
+  if (!coordinates) {
+    coordinates = await getLocationCords();
   }
-  const { latitude, longitude } = coOrdinates;
+  const { latitude, longitude } = coordinates;
 
   return new Promise(async (resolve, reject) => {
     const endpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${MAP_KEY}`;

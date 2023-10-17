@@ -6,14 +6,10 @@ import Box from '@mui/material/Box';
 import ProfileInfo from "./ProfileInfo";
 import FavoriteList from "./FavoriteList";
 import api from "../../api";
-import { addHours } from "../../utils/weather";
-import { getTimelineData, isDayTime } from "../../utils/weather";
+import {getCurrentData} from "../../utils/openmeteo";
 
 import "./index.scss";
-
-const now = new Date();
-const startTime = now.toISOString();
-const endTime = addHours({ date: now, hours: 1 }).toISOString();
+import { useSelector } from "react-redux";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -36,49 +32,52 @@ function TabPanel(props) {
 
 const Profile = () => {
     const [value, setValue] = useState(0);
-    const [user, setUser] = useState(null);
-    const [realtimeResponse, setRealtimeResponse] = useState([]);
-    const [isDayList, setIsDayList] = React.useState([]);
+    const user = useSelector((state) => state.user.user);
+    const [userData, setUserData] = useState(null);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
     const getUserData = async () => {
-        const email = sessionStorage.getItem("email")
-        return await api.get(`/user?email=${email}`);
+        try {
+            const response = JSON.parse(JSON.stringify(user));
+            response.locations = await getLocationWeatherData(response.locations);
+            setUserData(response);
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+        }
+    }
+
+    const getLocationWeatherData = async (locations) => {
+        const temp = await Promise.all(locations.map(async (loc) => {
+            const data = await getTimeline(loc.latitude, loc.longitude);
+            return {
+                ...loc, 
+                ...data
+            };
+        }));
+    
+        return temp;
     }
 
     const getTimeline = async (lat, lon) => {
         try {
-            const resp = await getTimelineData(
-                lat,
-                lon,
-                startTime,
-                endTime,
+            const resp = await getCurrentData(
+                {
+                    latitude: lat,
+                    longitude: lon
+                }
             );
-            setRealtimeResponse([...realtimeResponse, resp.data.timelines[1]])
+            return resp.current_weather;
         } catch (error) {
             console.error('Error fetching weather data:', error);
         }
     };
 
-    const getIsDay = async (lat, lon) => {
-        setIsDayList([...isDayList, await isDayTime(lat, lon)]);
-    };
-
     useEffect(() => {
-        getUserData().then((response) => {
-            setUser(response);
-            response.data.locations.forEach((list) => {
-                getIsDay(list.latitude, list.longitude);
-                getTimeline(list.latitude, list.longitude);
-            })
-        })
-    }, []);
-
-    console.log("realtimeResponse", realtimeResponse);
-    console.log("isDayList", isDayList)
+        getUserData();
+    }, [user]);
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" >
@@ -91,13 +90,11 @@ const Profile = () => {
                 <Tab label="Favorite List" />
             </Tabs>
             <TabPanel value={value} index={0} style={{ width: "50%" }}>
-                {user && <ProfileInfo user={user.data} />}
+                {userData && <ProfileInfo user={userData} />}
             </TabPanel>
             <TabPanel value={value} index={1} style={{ width: "50%" }}>
-                {user && <FavoriteList
-                    user={user.data}
-                    realtimeResponse={realtimeResponse}
-                    isDayList={isDayList}
+                {userData && <FavoriteList
+                    user={userData}
                 />}
             </TabPanel>
         </Box>

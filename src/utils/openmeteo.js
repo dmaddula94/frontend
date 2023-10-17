@@ -1,3 +1,18 @@
+import {store} from "../redux/store";
+import tzlookup from "tz-lookup";
+
+const getMetricData = () => {
+  return (store.getState())?.user?.user?.metric ? 'celsius' : 'fahrenheit';
+}
+
+const getLocation = () => {
+  return store.getState().location;
+}
+
+const getTimeZone = () => {
+  return tzlookup(getLocation().latitude, getLocation().longitude);
+}
+
 export const CODES = {
   0: "Clear Sky",
   1: "Mostly Clear",
@@ -126,7 +141,7 @@ export const formatForecastData = (data) => {
 
 export const getCurrentData = async (location) => {
   const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&temperature_unit=fahrenheit`
+    `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&temperature_unit=${getMetricData()}`
   );
   const data = await response.json();
   data.current_weather.temperature = Math.round(
@@ -142,7 +157,7 @@ export const getCurrentData = async (location) => {
 
 export const getHourlyData = async (location) => {
   const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=temperature,apparent_temperature,precipitation,rain,weathercode,visibility,windspeed_10m,temperature_80m,soil_temperature_0cm,uv_index,uv_index_clear_sky,is_day,cape,freezinglevel_height&temperature_unit=fahrenheit&windspeed_unit=mph&forecast_days=1&current_weather=true`
+    `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=temperature,apparent_temperature,precipitation,rain,weathercode,visibility,windspeed_10m,temperature_80m,soil_temperature_0cm,uv_index,uv_index_clear_sky,is_day,cape,freezinglevel_height&temperature_unit=${getMetricData()}&windspeed_unit=mph&forecast_days=1&current_weather=true`
   );
   const data = await response.json();
   data.hourly = formatObject(data.hourly);
@@ -152,19 +167,21 @@ export const getHourlyData = async (location) => {
 export const getWeatherData = async (location) => {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=visibility,uv_index,temperature_2m,apparent_temperature,precipitation_probability,precipitation,rain,snowfall,snow_depth,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FNew_York&current_weather=true&forecast_days=16`
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=visibility,uv_index,temperature_2m,apparent_temperature,precipitation_probability,precipitation,rain,snowfall,snow_depth,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum&temperature_unit=${getMetricData()}&windspeed_unit=mph&timezone=${getTimeZone()}&current_weather=true&forecast_days=16`
     );
     const data = await response.json();
-    data.current_weather.temperature = Math.round(
-      data.current_weather.temperature
-    );
-    data.current_weather.weatherstate = CODES[data.current_weather.weathercode];
-    data.current_weather.weatherbackground = getCurrentWeatherBackground(
-      data.current_weather.weathercode,
-      data.current_weather.is_day
-    );
-    data.daily = formatObject(data.daily);
-    data.hourly = formatObject(data.hourly);
+    if (data && data.current_weather && data.daily && data.hourly) {
+      data.current_weather.temperature = Math.round(
+        data.current_weather.temperature
+      );
+      data.current_weather.weatherstate = CODES[data.current_weather.weathercode];
+      data.current_weather.weatherbackground = getCurrentWeatherBackground(
+        data.current_weather.weathercode,
+        data.current_weather.is_day
+      );
+      data.daily = formatObject(data.daily);
+      data.hourly = formatObject(data.hourly);
+    }
     return data;
   } catch (error) {
     console.error("Error fetching weather data:", error);
