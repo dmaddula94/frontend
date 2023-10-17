@@ -97,6 +97,24 @@
     margin: 6px 0;
 }
 
+.hour-time, .hour-temp {
+    font-size: small;
+}
+
+.daily {
+    .hourly-container {
+        padding: 18px;
+    }
+    .hour-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .day-description {
+        font-size: small;
+    }
+}
+
 @media only screen and (max-width: 768px) {
     .hourly {
         flex-direction: column;
@@ -166,7 +184,7 @@
     // position: relative;
     border-radius: 5px;
     overflow: hidden;
-    width: 45%;
+    width: 150px;
 }
 
 .high-temp {

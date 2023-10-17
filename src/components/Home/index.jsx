@@ -14,7 +14,7 @@ const Home = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     dispatch(startLoader());
-    getLocation(state?.coOrdinates).then((loc) => {
+    getLocation(state?.coordinates).then((loc) => {
       dispatch(stopLoader());
       dispatch(setLocation(loc));
       dispatch(setCurrentLocation(loc));

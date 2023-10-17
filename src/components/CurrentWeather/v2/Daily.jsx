@@ -1,16 +1,9 @@
 import React from "react";
-import { formatDay, prettyPrintWeatherCode } from "../../../utils/weather";
+import { prettyPrintWeatherCode } from "../../../utils/weather";
 import Temp from "./Temp";
 import Hourly from "./Hourly";
 import WeatherIcon from "./WeatherIcon";
-
-function Loading() {
-  return <div>Loading...</div>;
-}
-
-function Error() {
-  return <div>Oops! Something went wrong :(</div>;
-}
+import { getFormattedTime } from "../../../utils/date";
 
 const DayForecast = ({
   dayData,
@@ -50,11 +43,7 @@ const DayForecast = ({
         onClick={() => openHourlyData(dayData.time)}
       >
         <p className="day-time">
-          {new Date(dayData.time).toLocaleDateString("en-US", {
-            // weekday: "short",
-            day: "numeric",
-            month: "numeric",
-          }).toUpperCase()}{" "}
+          {getFormattedTime(dayData.time, 'MM/DD')}
         </p>
         <div className="day-icon">
           <WeatherIcon value={dayData.weathercode} isDay={isDay} />{" "}
@@ -93,7 +82,7 @@ export default function Daily({ daily, isDay, hourly }) {
   const [daySelected, setDaySelected] = React.useState("");
 
   const openHourlyData = (selectedDate) => {
-    setDaySelected(selectedDate);
+    setDaySelected(daySelected !== selectedDate ? selectedDate : '');
   };
 
   const maxTemp = Math.max(...daily?.map((day) => day?.temperature_2m_max));

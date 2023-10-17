@@ -213,7 +213,7 @@ export const formatDay = (time) => {
  */
 export const prettyPrintWeatherCode = (code) => {
   const weatherCodes = {
-    0: "Unknown",
+    0: "Clear",
     1000: "Clear",
     1001: "Cloudy",
     1100: "Mostly Clear",

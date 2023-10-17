@@ -18,6 +18,7 @@ import Profile from "./components/Profile";
 import Footer from "./components/Footer";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import ChatBot from "./components/ChatBot";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -28,6 +29,7 @@ function ProtectedRoute({ children }) {
 function App() {
   const theme = useSelector((state) => state.theme);
   const weather = useSelector((state) => state.weather);
+  const [showChatbot, setShowChatbot] = React.useState(false);
 
   React.useEffect(() => {
     document.body.className = ''; // Clear any existing classes
@@ -53,6 +55,7 @@ function App() {
           <div className="glassy-overlay"></div>
           <div style={{ position: "relative" }} className={`content`}>
             <Header />
+            {/* <ChatBot /> */}
             <div className="container">
               <Routes>
                 <Route

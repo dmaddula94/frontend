@@ -7,7 +7,7 @@ import WeatherIcon from "./WeatherIcon";
 export default function Hourly({ hourly, isDay }) {
 
   return (
-    <Box sx={{ display: 'flex', overflowX: 'auto' }}>
+    <Box className="hourly-container" sx={{ display: 'flex', overflowX: 'auto' }}>
       {hourly?.map((hour, index) => (
         <Box key={index} className="hour">
           <div className="aspect-ratio-box">

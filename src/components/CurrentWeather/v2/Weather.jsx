@@ -19,15 +19,18 @@ import { setFavoriteLocationsList } from "../../../redux/reducers/weatherSlice";
 import { updateLocations } from "../../../redux/reducers/userSlice";
 import { Box } from "@mui/material";
 import { animated, useSpring } from "react-spring";
-
-const now = new Date();
+import ThermostatIcon from "@mui/icons-material/Thermostat";
+import { DateTime } from "luxon";
+import tzlookup from "tz-lookup";
+import { update } from "../../../redux/reducers/userSlice";
+import { useSnackbar } from "notistack";
 
 function FavoriteButton() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const location = useSelector((state) => state.location);
   const [isFavorite, setIsFavorite] = React.useState(false);
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const isLocationAddedToList = () => {
     const { locations } = user.user;
@@ -41,38 +44,72 @@ function FavoriteButton() {
 
   const addToFavoriteList = async () => {
     const { name, latitude, longitude } = location;
-    const response = await api.post("/userLocation", {
-      email: user.user.email,
-      location: {
-        name,
-        latitude,
-        longitude,
-      },
-    });
-    setIsFavorite(!isFavorite);
-    setIsButtonDisabled(true);
-    dispatch(updateLocations({ user: response.data }));
-    dispatch(
-      setFavoriteLocationsList({
-        favoriteLocationsList: {
+    try {
+      const response = await api.post("/userLocation", {
+        email: user.user.email,
+        location: {
           name,
           latitude,
           longitude,
         },
-      })
-    );
+      });
+      enqueueSnackbar('Location Added!', { variant: 'success' });
+      setIsFavorite(!isFavorite);
+      dispatch(updateLocations({ user: response.data }));
+      dispatch(
+        setFavoriteLocationsList({
+          favoriteLocationsList: {
+            name,
+            latitude,
+            longitude,
+          },
+        })
+      );
+    } catch (error) {
+      enqueueSnackbar('Error Adding Location', { variant: 'error' });
+      console.error("Error Adding Location:", error);
+    }
+  };
+
+  const getSelectedLocation = () => {
+    const { locations } = user.user;
+    const id = locations.find((list) => {
+      if (list.name === location.name) {
+        return list._id;
+      }
+    });
+    return id ?? null;
+  };
+
+  const deleteLocation = async (location) => {
+    const loc = getSelectedLocation();
+    if (loc && loc._id) {
+      try {
+        const { data } = await api.patch("/userLocation", {
+          _id: loc._id,
+        });
+        enqueueSnackbar('Location Deleted!', { variant: 'success' });
+        dispatch(update({ user: data }));
+        setIsFavorite(false);
+        dispatch(
+          setFavoriteLocationsList({ favoriteLocationsList: data.locations })
+        );
+      } catch (error) {
+        enqueueSnackbar('Error Deleting Location', { variant: 'error' });
+        console.error("Error Deleting Location:", error);
+      }
+    }
   };
 
   React.useEffect(() => {
     const isAdded = isLocationAddedToList();
     setIsFavorite(isAdded);
-    setIsButtonDisabled(isAdded);
   }, [location.latitude, location.longitude]);
 
   return (
-    <IconButton disabled={isButtonDisabled}>
+    <IconButton>
       {isFavorite ? (
-        <FavoriteIcon />
+        <FavoriteIcon onClick={deleteLocation} />
       ) : (
         <FavoriteBorderIcon onClick={addToFavoriteList} />
       )}
@@ -81,72 +118,55 @@ function FavoriteButton() {
 }
 
 function Weather({ lat, lon, location }) {
+  const user = useSelector((state) => state.user);
   const props = useSpring({ opacity: 1, from: { opacity: 0 } });
   const [realtimeResponse, setRealtimeResponse] = React.useState(null);
   const [dailyResponse, setDailyResponse] = React.useState(null);
   const [hourlyResponse, setHourlyResponse] = React.useState(null);
   const [currentHourData, setCurrentHourData] = React.useState({});
   const [fullData, setFullData] = React.useState({});
+  const [time, setTime] = React.useState("");
 
-  function getCurrentHourlyData(data) {
-    // Get the current date and hour
-    const currentDate = new Date();
-    const currentHour = currentDate.toISOString().substring(0, 13) + ":00";
+  function getCurrentHourlyData(data, lat, lon) {
+    const timezone = tzlookup(lat, lon);
+    const currentHour = DateTime.now()
+      .setZone(timezone)
+      .startOf("hour")
+      .toISO();
 
-    // Search for the hourly data for the current hour
     for (let i = 0; i < data.length; i++) {
-      if (data[i].time === currentHour) {
+      if (
+        DateTime.fromISO(data[i].time, { zone: timezone }).toISO() ===
+        currentHour
+      ) {
         return data[i];
       }
     }
-
-    // If no data is found for the current hour, return null
     return null;
   }
 
-  function getCurrentDayData(data, date = new Date().toISOString()) {
-    const currentDate = new Date(date).toISOString().substring(0, 10);
-    const arr = [];
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].time.substring(0, 10) === currentDate) {
-        arr.push(data[i]);
-      }
-    }
+  function getCurrentDayRemainingHourlyData(data, lat, lon) {
+    const timezone = tzlookup(lat, lon);
+    const currentDate = DateTime.now().setZone(timezone).startOf("hour");
+    const endOfDay = DateTime.now().setZone(timezone).endOf("day");
+    const arr = data.filter((item) => {
+      const itemDatetime = DateTime.fromISO(item.time, { zone: timezone });
+      return itemDatetime >= currentDate && itemDatetime <= endOfDay;
+    });
+
     return arr;
   }
-
-  function getCurrentDayRemainingHourlyData(data) {
-    // Get the current date and hour in ISO format
-    const currentDate = new Date();
-    const currentISO = currentDate.toISOString();
-    const currentDay = currentISO.substring(0, 10);
-    const currentHour = parseInt(currentISO.substring(11, 13), 10);
-  
-    // Search for the hourly data for the current day from the current hour to the end
-    const remainingData = [];
-    for (let i = 0; i < data.length; i++) {
-      const dataDate = data[i].time.substring(0, 10);
-      const dataHour = parseInt(data[i].time.substring(11, 13), 10);
-      if (dataDate === currentDay && dataHour >= currentHour) {
-        remainingData.push(data[i]);
-      }
-    }
-  
-    // If no data is found for the current day from now to end, return null
-    return remainingData.length > 0 ? remainingData : null;
-  }
-  
-  
 
   const weatherData = async (lat, lon) => {
     try {
       const response = await getWeatherData({ latitude: lat, longitude: lon });
       setFullData(response);
       setRealtimeResponse(response.current_weather);
-      setHourlyResponse(getCurrentDayData(response.hourly));
+      setHourlyResponse(
+        getCurrentDayRemainingHourlyData(response.hourly, lat, lon)
+      );
       setDailyResponse(response.daily);
-      setCurrentHourData(getCurrentHourlyData(response.hourly));
-      console.log(getCurrentDayRemainingHourlyData(response.hourly));
+      setCurrentHourData(getCurrentHourlyData(response.hourly, lat, lon));
     } catch (error) {
       console.error("Error fetching weather data:", error);
     }
@@ -154,12 +174,17 @@ function Weather({ lat, lon, location }) {
   useEffect(() => {
     if (lat && lon) {
       weatherData(lat, lon);
+      getCurrentDateTimeForLocation(lat, lon);
     }
   }, [lat, lon]);
 
   function metersToMiles(meters) {
     const conversionFactor = 1 / 1609.344;
     return Math.round(meters * conversionFactor);
+  }
+
+  function metersToKm(meters) {
+    return Math.round(meters / 1000);
   }
 
   const getUVIndexLabel = (uvIndex) => {
@@ -174,40 +199,19 @@ function Weather({ lat, lon, location }) {
     }
   };
 
+  const getCurrentDateTimeForLocation = (lat, lon, set = true) => {
+    const timezone = tzlookup(lat, lon);
+    const dateTime = DateTime.now().setZone(timezone);
+    const formattedDateTime = dateTime.toLocaleString(
+      DateTime.DATE_MED_WITH_WEEKDAY
+    );
+    if (set) setTime(formattedDateTime);
+    return formattedDateTime;
+  };
+
   return (
     <>
       <div className="weather">
-        {/* {realtimeResponse && hourlyResponse && dailyResponse && (
-          <>
-            <div className="glassbackground current-weather col-5">
-              <div className="time">{now.toDateString()}</div>
-              <div
-                className="location"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <PlaceIcon
-                  width="16"
-                  height="16"
-                  style={{ marginRight: "4px" }}
-                />
-                {location}
-              </div>
-              <Realtime
-                realtime={realtimeResponse}
-                isDay={realtimeResponse?.is_day}
-              />
-              <div className="divider" />
-              <Hourly
-                hourly={hourlyResponse}
-                isDay={realtimeResponse?.is_day}
-              />
-            </div>
-            <div className="glassbackground current-weather col-5">
-              <Daily daily={dailyResponse} isDay={realtimeResponse?.is_day} />
-            </div>
-          </>
-        )} */}
-
         {realtimeResponse && hourlyResponse && dailyResponse && (
           <Box className="weather row">
             <div className="left-section col-5">
@@ -219,7 +223,7 @@ function Weather({ lat, lon, location }) {
                   }}
                   className="d-flex"
                 >
-                  <div className="time">{now.toDateString()}</div>
+                  <div className="time">{time}</div>
                   <FavoriteButton />
                 </div>
                 <div
@@ -240,7 +244,7 @@ function Weather({ lat, lon, location }) {
                 <div className="divider" />
                 <div className="forcast">
                   <ScheduleIcon style={{ marginRight: "5px" }} />
-                  12-hour forcast
+                  hourly forecast
                 </div>
                 <Hourly
                   hourly={hourlyResponse}
@@ -248,8 +252,16 @@ function Weather({ lat, lon, location }) {
                 />
               </div>
 
-              <div style={{ display: "flex", gap: "4px", textAlign: "center" }}>
-                <div className="glassbackground current-weather col-4">
+              <div
+                className="row"
+                style={{
+                  display: "flex",
+                  gap: "4px",
+                  textAlign: "center",
+                  justifyContent: "space-around",
+                }}
+              >
+                <div className="glassbackground current-weather col-5">
                   <Typography
                     variant="h6"
                     style={{ marginBottom: "12px", textAlign: "center" }}
@@ -266,7 +278,7 @@ function Weather({ lat, lon, location }) {
                     <Typography variant="subtitle1"></Typography>
                   </animated.div>
                 </div>
-                <div className="glassbackground current-weather col-4">
+                <div className="glassbackground current-weather col-5">
                   <Typography
                     variant="h6"
                     style={{ marginBottom: "12px", textAlign: "center" }}
@@ -275,28 +287,52 @@ function Weather({ lat, lon, location }) {
                     <p>Visibility</p>
                   </Typography>
                   <animated.div style={props}>
-                    <Typography>{`${metersToMiles(
-                      currentHourData?.visibility
-                    )} mi`}</Typography>
+                    <Typography>{`${
+                      user?.user?.metric
+                        ? metersToKm(currentHourData?.visibility) + " km"
+                        : metersToMiles(currentHourData?.visibility) + " mi"
+                    }`}</Typography>
                   </animated.div>
                 </div>
-                <div className="glassbackground current-weather col-4">
+                <div className="glassbackground current-weather col-5">
                   <Typography
                     variant="h6"
                     style={{ marginBottom: "12px", textAlign: "center" }}
                   >
                     <OpacityIcon />
-                    <p>Percipitation</p>
+                    <p>Precipitation</p>
                   </Typography>
                   <animated.div style={props}>
                     <Typography>{currentHourData?.precipitation}</Typography>
+                  </animated.div>
+                </div>
+                <div className="glassbackground current-weather col-5">
+                  <Typography
+                    variant="h6"
+                    style={{ marginBottom: "12px", textAlign: "center" }}
+                  >
+                    <ThermostatIcon />
+                    <p>Feels Like</p>
+                  </Typography>
+                  <animated.div style={props}>
+                    <Typography>{`${Math.round(
+                      currentHourData?.apparent_temperature
+                    )}°`}</Typography>
                   </animated.div>
                 </div>
               </div>
             </div>
             <div className="right-section col-5">
               <div className="glassbackground current-weather">
-                <Daily daily={dailyResponse} hourly={fullData.hourly} isDay={realtimeResponse?.is_day} />
+                <div style={{ marginLeft: "10px" }} className="forcast">
+                  <ScheduleIcon style={{ marginRight: "5px" }} />
+                  16-day forecast
+                </div>
+                <Daily
+                  daily={dailyResponse}
+                  hourly={fullData.hourly}
+                  isDay={realtimeResponse?.is_day}
+                />
               </div>
             </div>
           </Box>
