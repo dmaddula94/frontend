@@ -4,6 +4,7 @@ import Temp from "./Temp";
 import Hourly from "./Hourly";
 import WeatherIcon from "./WeatherIcon";
 import { getFormattedTime } from "../../../utils/date";
+import { Transition } from "react-transition-group";
 
 const DayForecast = ({
   dayData,
@@ -42,9 +43,7 @@ const DayForecast = ({
         style={{ cursor: "pointer" }}
         onClick={() => openHourlyData(dayData.time)}
       >
-        <p className="day-time">
-          {getFormattedTime(dayData.time, 'MM/DD')}
-        </p>
+        <p className="day-time">{getFormattedTime(dayData.time, "MM/DD")}</p>
         <div className="day-icon">
           <WeatherIcon value={dayData.weathercode} isDay={isDay} />{" "}
         </div>
@@ -69,10 +68,20 @@ const DayForecast = ({
         </p>
       </div>
       {daySelected === dayData.time && (
-        <Hourly
-          hourly={getCurrentDayData(hourly, dayData.time)}
-          isDay={isDay}
-        />
+        <Transition
+          in={daySelected === dayData.time}
+          timeout={5000}
+          unmountOnExit
+          classNames="hourly"
+        >
+          {(state) => (
+            <Hourly
+              hourly={getCurrentDayData(hourly, dayData.time)}
+              isDay={isDay}
+              state={state}
+            />
+          )}
+        </Transition>
       )}
     </>
   );
@@ -82,7 +91,7 @@ export default function Daily({ daily, isDay, hourly }) {
   const [daySelected, setDaySelected] = React.useState("");
 
   const openHourlyData = (selectedDate) => {
-    setDaySelected(daySelected !== selectedDate ? selectedDate : '');
+    setDaySelected(daySelected !== selectedDate ? selectedDate : "");
   };
 
   const maxTemp = Math.max(...daily?.map((day) => day?.temperature_2m_max));

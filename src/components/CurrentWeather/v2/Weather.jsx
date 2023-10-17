@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFavoriteLocationsList } from "../../../redux/reducers/weatherSlice";
 import { updateLocations } from "../../../redux/reducers/userSlice";
 import { Box } from "@mui/material";
-import { animated, useSpring } from "react-spring";
+import { animated, useSpring } from "@react-spring/web";
 import ThermostatIcon from "@mui/icons-material/Thermostat";
 import { DateTime } from "luxon";
 import tzlookup from "tz-lookup";
@@ -31,6 +31,42 @@ function FavoriteButton() {
   const location = useSelector((state) => state.location);
   const [isFavorite, setIsFavorite] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  // const [jiggleProps, setJiggle] = useSpring(() => ({
+  //   rotation: 0,
+  //   config: {
+  //     tension: 2500,
+  //     friction: 20
+  //   }
+  // }));
+
+  // const startJiggle = () => {
+  //   setJiggle({ rotation: 4, immediate: false });
+  // };
+
+  // const stopJiggle = () => {
+  //   setJiggle({ rotation: 0, immediate: true });
+  // };
+
+  const [pulseProps, setPulse] = useSpring(() => ({
+    scale: 1,
+    config: {
+      tension: 500, 
+      friction: 20,   
+    }
+  }));
+
+  React.useEffect(() => {
+    if (pulseProps.scale.get() === 1.2) {
+      setTimeout(() => {
+        setPulse({ scale: 1 });
+      }, 100);
+    }
+  }, [pulseProps.scale]);
+
+  const triggerPulse = () => {
+    setPulse({ scale: 1.2 });
+  };
 
   const isLocationAddedToList = () => {
     const { locations } = user.user;
@@ -107,11 +143,17 @@ function FavoriteButton() {
   }, [location.latitude, location.longitude]);
 
   return (
-    <IconButton>
+    <IconButton
+      onClick={triggerPulse}
+    >
       {isFavorite ? (
-        <FavoriteIcon onClick={deleteLocation} />
+        <animated.div style={{ transform: pulseProps.scale.to(s => `scale(${s})`) }}>
+          <FavoriteIcon onClick={deleteLocation} />
+        </animated.div>
       ) : (
-        <FavoriteBorderIcon onClick={addToFavoriteList} />
+        <animated.div style={{ transform: pulseProps.scale.to(s => `scale(${s})`) }}>
+          <FavoriteBorderIcon onClick={addToFavoriteList} />
+        </animated.div>
       )}
     </IconButton>
   );
@@ -119,13 +161,31 @@ function FavoriteButton() {
 
 function Weather({ lat, lon, location }) {
   const user = useSelector((state) => state.user);
-  const props = useSpring({ opacity: 1, from: { opacity: 0 } });
   const [realtimeResponse, setRealtimeResponse] = React.useState(null);
   const [dailyResponse, setDailyResponse] = React.useState(null);
   const [hourlyResponse, setHourlyResponse] = React.useState(null);
   const [currentHourData, setCurrentHourData] = React.useState({});
   const [fullData, setFullData] = React.useState({});
   const [time, setTime] = React.useState("");
+
+  const jiggle = () => ({
+    transform: 'scale(1.1)', 
+    config: { tension: 300, friction: 10 },
+    onRest: () => {
+      setJiggleAnim({
+        transform: 'scale(1)',
+        config: { tension: 300, friction: 10 }
+      });
+    }
+  });
+
+  const [jiggleAnim, setJiggleAnim] = useSpring(() => ({
+    transform: 'scale(1)',
+  }));
+
+  useEffect(() => {
+    setJiggleAnim(jiggle());
+  }, []);
 
   function getCurrentHourlyData(data, lat, lon) {
     const timezone = tzlookup(lat, lon);
@@ -269,7 +329,7 @@ function Weather({ lat, lon, location }) {
                     <Brightness5Icon />
                     <p>UV Index</p>
                   </Typography>
-                  <animated.div style={props}>
+                  <animated.div style={jiggleAnim}>
                     <Typography>{`${
                       currentHourData?.uv_index
                     } - ${getUVIndexLabel(
@@ -286,7 +346,7 @@ function Weather({ lat, lon, location }) {
                     <VisibilityIcon />
                     <p>Visibility</p>
                   </Typography>
-                  <animated.div style={props}>
+                  <animated.div style={jiggleAnim}>
                     <Typography>{`${
                       user?.user?.metric
                         ? metersToKm(currentHourData?.visibility) + " km"
@@ -302,7 +362,7 @@ function Weather({ lat, lon, location }) {
                     <OpacityIcon />
                     <p>Precipitation</p>
                   </Typography>
-                  <animated.div style={props}>
+                  <animated.div style={jiggleAnim}>
                     <Typography>{currentHourData?.precipitation}</Typography>
                   </animated.div>
                 </div>
@@ -314,7 +374,7 @@ function Weather({ lat, lon, location }) {
                     <ThermostatIcon />
                     <p>Feels Like</p>
                   </Typography>
-                  <animated.div style={props}>
+                  <animated.div style={jiggleAnim}>
                     <Typography>{`${Math.round(
                       currentHourData?.apparent_temperature
                     )}°`}</Typography>

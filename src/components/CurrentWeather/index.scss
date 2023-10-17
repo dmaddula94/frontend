@@ -214,3 +214,21 @@ p {
     margin-bottom: 12px;
 }
 
+.hourly-entering,
+.hourly-exiting,
+.hourly-exited {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 300ms, max-height 300ms;
+}
+
+.hourly-entered {
+  opacity: 1;
+  max-height: 500px;  /* Adjust based on your content's maximum height */
+  transition: opacity 300ms, max-height 300ms;
+}
+
+.hourly {
+    border: 2px solid red; /* This is for debugging, remove once verified */
+}
