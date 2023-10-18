@@ -1,0 +1,149 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.border-radius {
+  border-radius: 16px;
+}
+
+.dark-mode {
+  color: #fff;
+}
+
+.dark-mode a {
+  color: #fff;
+}
+
+.light-mode {
+  color: #000;
+}
+
+.light-mode a {
+  color: #000;
+}
+
+.dark-mode .glassbackground {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.light-mode .glassbackground {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.centerX {
+  transform: translate(50%, 0);
+}
+
+.centerY {
+  transform: translate(0, 50%);
+}
+
+.center {
+  transform: translate(50%, 50%);
+}
+
+.dark-mode .text-theme {
+  color: #fff;
+}
+
+.dark-mode .text-theme-inverted {
+  color: #000;
+}
+
+.light-mode .text-theme {
+  color: #000;
+}
+
+.light-mode .text-theme-inverted {
+  color: #fff;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.pac-container {
+  background-color: #fff;
+  color: #000;
+  border-color: #ccc;
+  width: 240px;
+}
+
+.pac-item {
+  border-bottom: 1px solid #ccc;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+/* Dark Mode Styles */
+.dark-mode .pac-container {
+  background-color: #333;
+  color: #fff;
+  border-color: #555;
+}
+
+.dark-mode .pac-item {
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+
+.dark-mode .pac-item-query {
+  color: #fff;
+}
+
+.dark-mode .pac-item:hover {
+  background-color: #555;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* For Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+@media (min-width: 767px) {
+  .weather .left-section {
+    flex: 0 0 auto;
+    width: 41.66667%;
+  }
+}
+
+.mobile-width {
+  width: 115% !important;
+}
+.mobile-width-2 {
+  width: 40% !important;
+}
+
+.desktop-width {
+  width: 50% !important;
+}
+
+.mobile-hide{
+  display: none !important;
+}
