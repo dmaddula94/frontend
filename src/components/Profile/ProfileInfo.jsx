@@ -51,118 +51,117 @@ function ProfileInfo({ user }) {
     setIsCelsius(event.target.checked);
   };
 
-  return (
+  return  (
     <Box
-      component={"div"}
-      sx={{ padding: "20px", marginTop: "50px" }}
-      className="d-flex flex-column justify-content-center glassbackground border-radius p-5"
+      sx={{
+        padding: "20px",
+        maxWidth: "100%",
+        width: "100%",
+        margin: "auto",
+      }}
     >
-      <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Avatar sx={{ width: 120, height: 120, fontSize: "3rem" }}>
           {`${firstName[0]}${lastName[0]}`}
         </Avatar>
 
-        {isEditing && (
-          <TextField
-            label="First Name"
-            value={userFirstname}
-            onChange={(e) => setUserFirstName(e.target.value)}
-            margin="normal"
-            variant="outlined"
-            fullWidth
-          />
-        )}
-
-        {isEditing && (
-          <TextField
-            label="Last Name"
-            value={userLastName}
-            onChange={(e) => setUserLastName(e.target.value)}
-            margin="normal"
-            variant="outlined"
-            fullWidth
-          />
-        )}
-
-        {!isEditing && (
-          <Typography variant="h5" gutterBottom>
-            {`${userFirstname}, ${userLastName}`}
-          </Typography>
-        )}
-
-        {isEditing ? (
-          <TextField
-            label="Email"
-            value={email}
-            margin="normal"
-            variant="outlined"
-            disabled
-            fullWidth
-          />
-        ) : (
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            {email}
-          </Typography>
-        )}
-
-        {isEditing ? (
-          <TextField
-            label="Phone Number"
-            value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-          />
-        ) : (
-          <Typography variant="body1" paragraph>
-            {mobileNumber}
-          </Typography>
-        )}
-
-        {isEditing && (
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isCelsius}
-                onChange={handleToggle}
-                color="primary"
+        <Box
+          width="100%"
+          mt={2}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          {isEditing ? (
+            <>
+              <TextField
+                label="First Name"
+                value={userFirstname}
+                onChange={(e) => setUserFirstName(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                fullWidth
               />
-            }
-            label={isCelsius ? "°C" : "°F"}
-          />
-        )}
-
-        {isEditing && (
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={enableAlerts}
-                onChange={() => setEnableAlerts(!enableAlerts)}
-                className="mb-1"
+              <TextField
+                label="Last Name"
+                value={userLastName}
+                onChange={(e) => setUserLastName(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                fullWidth
               />
-            }
-            label="Enable Text and Email Alerts"
-          />
-        )}
-        <Stack spacing={2} direction="row">
-          <Button variant="contained" color="primary" onClick={handleEditClick}>
-            {isEditing ? "Save" : "Edit Profile"}
-          </Button>
-
-          {isEditing && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              Cancel
-            </Button>
+              <TextField
+                label="Phone Number"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                variant="outlined"
+                margin="normal"
+                fullWidth
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isCelsius}
+                    onChange={handleToggle}
+                    color="primary"
+                  />
+                }
+                label={isCelsius ? "°C" : "°F"}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={enableAlerts}
+                    onChange={() => setEnableAlerts(!enableAlerts)}
+                  />
+                }
+                label="Enable Text and Email Alerts"
+              />
+            </>
+          ) : (
+            <>
+              <Typography variant="h5" gutterBottom>
+                {`${userFirstname}, ${userLastName}`}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                {email}
+              </Typography>
+              <Typography variant="body1" paragraph>
+                {mobileNumber}
+              </Typography>
+            </>
           )}
-        </Stack>
+
+          <Stack spacing={2} mt={2} direction="column" sx={{ width: "100%" }}>
+            <Button variant="contained" color="primary" onClick={handleEditClick} fullWidth>
+              {isEditing ? "Save" : "Edit Profile"}
+            </Button>
+            {isEditing && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsEditing(!isEditing)}
+                fullWidth
+              >
+                Cancel
+              </Button>
+            )}
+          </Stack>
+        </Box>
       </Box>
     </Box>
   );
+   
 }
 
 export default ProfileInfo;

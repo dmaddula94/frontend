@@ -59,8 +59,8 @@ function ResetPassword() {
   return (
     <Box
       component={"div"}
-      sx={{ padding: "20px", transform: "translate(50%, 20px)" }}
-      className="col-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
+      sx={{ padding: "20px",  margin: "10px auto" }}
+      className="col-xl-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
     >
       <Typography className="mb-3" variant="h4" align="center">
         Reset Password

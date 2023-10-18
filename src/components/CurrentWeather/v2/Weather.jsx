@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Realtime from "./Realtime";
 import Hourly from "./Hourly";
 import Daily from "./Daily";
@@ -31,6 +31,7 @@ function FavoriteButton() {
   const location = useSelector((state) => state.location);
   const [isFavorite, setIsFavorite] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
 
   // const [jiggleProps, setJiggle] = useSpring(() => ({
   //   rotation: 0,
@@ -167,6 +168,7 @@ function Weather({ lat, lon, location }) {
   const [currentHourData, setCurrentHourData] = React.useState({});
   const [fullData, setFullData] = React.useState({});
   const [time, setTime] = React.useState("");
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
 
   const jiggle = () => ({
     transform: 'scale(1.1)', 
@@ -274,7 +276,7 @@ function Weather({ lat, lon, location }) {
       <div className="weather">
         {realtimeResponse && hourlyResponse && dailyResponse && (
           <Box className="weather row">
-            <div className="left-section col-5">
+            <div className={isDesktop ? "left-section col-5" : "left-section"}>
               <div className="glassbackground current-weather">
                 <div
                   style={{
@@ -382,7 +384,7 @@ function Weather({ lat, lon, location }) {
                 </div>
               </div>
             </div>
-            <div className="right-section col-5">
+            <div  className={isDesktop ? "right-section col-5" : "right-section"}>
               <div className="glassbackground current-weather">
                 <div style={{ marginLeft: "10px" }} className="forcast">
                   <ScheduleIcon style={{ marginRight: "5px" }} />

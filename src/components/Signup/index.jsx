@@ -79,11 +79,16 @@ function Signup() {
 
   const handleSignup = async () => {
     try {
-      const response = await api.post("/create", { email, password, firstName, lastName, phoneNumber: mobile, alerts: enableAlerts});
+      const response = await api.post("/create", {
+        email,
+        password,
+        firstName,
+        lastName,
+        phoneNumber: mobile,
+        alerts: enableAlerts,
+      });
       if (response.data && response.data.token) {
-        dispatch(
-          login({ user: response.data, token: response.data.token })
-        );
+        dispatch(login({ user: response.data, token: response.data.token }));
         navigate("/");
       } else {
         // Handle any error messages or alerts here
@@ -98,8 +103,8 @@ function Signup() {
   return (
     <Box
       component={"div"}
-      sx={{ padding: "20px", transform: "translate(50%, 20px)" }}
-      className="col-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
+      sx={{ padding: "20px",  margin: "10px auto" }}
+      className="col-xl-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
     >
       <Box className="mb-3" component={"div"}>
         <img
@@ -152,7 +157,9 @@ function Signup() {
       <TextField
         error={!!mobileError}
         helperText={mobileError}
-        onBlur={() => handleBlur(validateMobile, mobile, setMobileError, enableAlerts)}
+        onBlur={() =>
+          handleBlur(validateMobile, mobile, setMobileError, enableAlerts)
+        }
         type="number"
         label="Mobile"
         variant="outlined"

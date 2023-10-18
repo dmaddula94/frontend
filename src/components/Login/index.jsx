@@ -56,83 +56,86 @@ function Login() {
 
   return (
     <Box
-      component={"div"}
-      sx={{ padding: "20px", transform: "translate(50%, 20px)" }}
-      className="col-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
-    >
-      <Box className="mb-3" component={"div"}>
-        <img
-          width="240"
-          src={`${theme.darkMode ? "/logo-short.svg" : "/logo-short-dark.svg"}`}
-          alt="Marist Weather Dashboard Logo"
-        />
-      </Box>
-      <Typography className="mb-3" variant="h4" align="center">
-        Login
-      </Typography>
-      <TextField
-        type="email"
-        label="Email"
-        className="mb-3"
-        variant="outlined"
-        value={email}
-        onChange={handleEmailChange}
-        onBlur={() => handleBlur(validateEmail, email, setEmailError)}
-        error={!!emailError}
-        helperText={emailError}
-        fullWidth
+    component={"div"}
+    sx={{
+      padding: "20px",
+      margin: "10px auto",
+    }}
+    className="col-xl-6 d-flex flex-column align-items-center justify-content-center glassbackground border-radius p-5"
+  >
+    <Box className="mb-3" component={"div"}>
+      <img
+        width="240"
+        src={`/logo-short${theme.darkMode ? "-dark" : ""}.svg`}
+        alt="Marist Weather Dashboard Logo"
       />
-      <TextField
-        type={showPassword ? "text" : "password"}
-        label="Password"
-        className="mb-3"
-        variant="outlined"
-        value={password}
-        onChange={handlePasswordChange}
-        onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
-        error={!!passwordError}
-        helperText={passwordError}
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={() => setShowPassword(!showPassword)}
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Button
-        className="mb-3 w-50"
-        variant="contained"
-        color="primary"
-        onClick={handleLogin}
-        disabled={!isFormValid}
-      >
-        Login
-      </Button>
-      <Button
-        className="mb-3 w-50"
-        variant="outlined"
-        color="secondary"
-        onClick={() => navigate("/signup")}
-      >
-        Sign Up
-      </Button>
-      <Link
-        component="button"
-        variant="body2"
-        onClick={() => navigate("/forgot-password")}
-        className="mb-3 w-50"
-      >
-        Forgot Password?
-      </Link>
     </Box>
-  );
+    <Typography className="mb-3" variant="h4" align="center">
+      Login
+    </Typography>
+    <TextField
+      type="email"
+      label="Email"
+      className="mb-3"
+      variant="outlined"
+      value={email}
+      onChange={handleEmailChange}
+      onBlur={() => handleBlur(validateEmail, email, setEmailError)}
+      error={!!emailError}
+      helperText={emailError}
+      fullWidth
+    />
+    <TextField
+      type={showPassword ? "text" : "password"}
+      label="Password"
+      className="mb-3"
+      variant="outlined"
+      value={password}
+      onChange={handlePasswordChange}
+      onBlur={() => handleBlur(validatePassword, password, setPasswordError)}
+      error={!!passwordError}
+      helperText={passwordError}
+      fullWidth
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton
+              onClick={() => setShowPassword(!showPassword)}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+    <Button
+      className="mb-3 w-50"
+      variant="contained"
+      color="primary"
+      onClick={handleLogin}
+      disabled={!isFormValid}
+    >
+      Login
+    </Button>
+    <Button
+      className="mb-3 w-50"
+      variant="outlined"
+      color="secondary"
+      onClick={() => navigate("/signup")}
+    >
+      Sign Up
+    </Button>
+    <Link
+      component="button"
+      variant="body2"
+      onClick={() => navigate("/forgot-password")}
+      className="mb-3 w-50"
+    >
+      Forgot Password?
+    </Link>
+  </Box>
+);
 }
 
 export default Login;

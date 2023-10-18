@@ -6,3 +6,9 @@
         background: rgba(0, 0, 0, 0.5);
     }
 }
+
+@media (max-width: 767px) {
+    .footer-container {
+        flex-direction: column;
+    }
+}

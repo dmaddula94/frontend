@@ -62,6 +62,7 @@
     width: 100%;
     padding-bottom: 100%; /* for 1:1 aspect ratio */
     overflow: hidden;
+    height: 100%;
 }
 
 .aspect-ratio-box-content {
@@ -232,3 +233,18 @@ p {
 .hourly {
     border: 2px solid red; /* This is for debugging, remove once verified */
 }
+
+@media (max-width: 767px) {
+    .hourly-container {
+        min-height: 80px;
+        
+        .daily & {
+            padding: 6px 18px !important;
+        }
+    }
+
+    .hour-icon {
+        width: 24px;
+        height: 24px;
+    }
+  }

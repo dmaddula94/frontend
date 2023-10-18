@@ -124,3 +124,26 @@ input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+
+@media (min-width: 767px) {
+  .weather .left-section {
+    flex: 0 0 auto;
+    width: 41.66667%;
+  }
+}
+
+.mobile-width {
+  width: 115% !important;
+}
+.mobile-width-2 {
+  width: 40% !important;
+}
+
+.desktop-width {
+  width: 50% !important;
+}
+
+.mobile-hide{
+  display: none !important;
+}

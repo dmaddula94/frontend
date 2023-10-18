@@ -13,9 +13,11 @@ import { useSelector } from "react-redux";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
     return (
         <div
             role="tabpanel"
+            className={!isDesktop ? "mobile-width" : "desktop-width"}
             hidden={value !== index}
             id={`full-width-tabpanel-${index}`}
             aria-labelledby={`full-width-tab-${index}`}

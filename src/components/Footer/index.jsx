@@ -13,6 +13,7 @@ function Footer() {
       }}
     >
       <Box
+        className='footer-container'
         sx={{
           maxWidth: '1200px',
           margin: '0 auto',
