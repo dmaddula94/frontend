@@ -20,6 +20,7 @@ function Login() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -110,7 +111,7 @@ function Login() {
       }}
     />
     <Button
-      className="mb-3 w-50"
+      className="mb-3 button-width"
       variant="contained"
       color="primary"
       onClick={handleLogin}
@@ -119,7 +120,7 @@ function Login() {
       Login
     </Button>
     <Button
-      className="mb-3 w-50"
+      className="mb-3 button-width"
       variant="outlined"
       color="secondary"
       onClick={() => navigate("/signup")}
@@ -130,7 +131,7 @@ function Login() {
       component="button"
       variant="body2"
       onClick={() => navigate("/forgot-password")}
-      className="mb-3 w-50"
+      className={`mb-3 button-width`}
     >
       Forgot Password?
     </Link>

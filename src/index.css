@@ -144,6 +144,35 @@ input[type="number"]::-webkit-outer-spin-button {
   width: 50% !important;
 }
 
-.mobile-hide{
-  display: none !important;
+.button-width {
+  width: 50% !important;
+}
+
+@media screen and (max-width: 767px) {
+  .button-width {
+    width: 100% !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  .desktop-width {
+    width: 100% !important;
+  }
+
+  .mobile-hide{
+    display: none !important;
+  }
+}
+
+
+@media screen and (min-width: 767px) {
+  .desktop-full-width {
+    width: 100% !important;
+  }
+
+  .desktop-hide{
+    display: none !important;
+  }
 }

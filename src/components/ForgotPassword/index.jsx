@@ -10,6 +10,7 @@ function ForgotPassword() {
   const [emailError, setEmailError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -61,7 +62,7 @@ function ForgotPassword() {
             variant="contained"
             color="primary"
             onClick={handleForgotPassword}
-            className="mb-3 w-50"
+            className={`mb-3 button-width`}
             disabled={!isFormValid}
           >
             Send Reset Link
@@ -75,7 +76,7 @@ function ForgotPassword() {
               component="button"
               variant="body2"
               onClick={() => setSuccess(false)}
-              className="mb-3 w-50"
+              className={`mb-3 button-width`}
             >
               Re-enter Email?
             </Link>
@@ -86,7 +87,7 @@ function ForgotPassword() {
         variant="outlined"
         color="secondary"
         onClick={() => navigate("/login")}
-        className="mb-3 w-50"
+        className={`mb-3 button-width`}
       >
         Back to Login
       </Button>

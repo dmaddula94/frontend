@@ -62,8 +62,8 @@ function FavoriteList({ user }) {
   return (
     <Box
       component={"div"}
-      sx={{ padding: "20px", marginTop: "50px" }}
-      className="d-flex flex-column justify-content-center glassbackground border-radius p-5"
+      sx={{ padding: "20px" }}
+      className="d-flex flex-column justify-content-center glassbackground border-radius p-4 p-md-5"
     >
       {favLocations.length ? (
         favLocations.map((location, i) => {

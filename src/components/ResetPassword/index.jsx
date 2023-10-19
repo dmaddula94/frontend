@@ -17,6 +17,7 @@ function ResetPassword() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleBlur = (validator, value, setter, value2) => {
     const error = validator(value, value2);
@@ -119,7 +120,7 @@ function ResetPassword() {
         variant="contained"
         color="primary"
         onClick={handleResetPassword}
-        className="mb-3 w-50"
+        className={`mb-3 button-width`}
         disabled={!isFormValid}
       >
         Reset Password
@@ -128,7 +129,7 @@ function ResetPassword() {
         variant="outlined"
         color="secondary"
         onClick={() => navigate("/login")}
-        className="mb-3 w-50"
+        className={`mb-3 button-width`}
       >
         Back to Login
       </Button>

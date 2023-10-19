@@ -29,13 +29,9 @@ function CurrentWeather() {
 
   return (
     <>
-      {
-        !isDesktop && (
-          <div className="location-search mt-4">
-            <Search />
-          </div>
-        )
-      }
+      <div className="location-search mt-4 desktop-hide">
+        <Search />
+      </div>
       {location.latitude && location.longitude && location.name && (
         <Weather
           lat={location.latitude}

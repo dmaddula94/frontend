@@ -276,7 +276,7 @@ function Weather({ lat, lon, location }) {
       <div className="weather">
         {realtimeResponse && hourlyResponse && dailyResponse && (
           <Box className="weather row">
-            <div className={isDesktop ? "left-section col-5" : "left-section"}>
+            <div className="left-section col-md-6">
               <div className="glassbackground current-weather">
                 <div
                   style={{
@@ -384,7 +384,7 @@ function Weather({ lat, lon, location }) {
                 </div>
               </div>
             </div>
-            <div  className={isDesktop ? "right-section col-5" : "right-section"}>
+            <div  className="right-section col-md-6">
               <div className="glassbackground current-weather">
                 <div style={{ marginLeft: "10px" }} className="forcast">
                   <ScheduleIcon style={{ marginRight: "5px" }} />

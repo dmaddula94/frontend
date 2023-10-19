@@ -108,7 +108,7 @@ function Header() {
         </div>
         <div className="right-section">
           {user.isAuthenticated && (
-            <div className={!isDesktop ? "mobile-hide" : "location-search"}>
+            <div  className="location-search mobile-hide">
               <Search />
             </div>
           )}

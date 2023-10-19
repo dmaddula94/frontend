@@ -51,6 +51,7 @@ function Signup() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleBlur = (validator, value, setter, value2) => {
     const error = validator(value, value2, setter);
@@ -259,7 +260,7 @@ function Signup() {
         variant="contained"
         color="primary"
         onClick={handleSignup}
-        className="mb-3 w-50"
+        className={`mb-3 button-width`}
         disabled={!agreeTerms || !isFormValid}
       >
         Signup
@@ -268,7 +269,7 @@ function Signup() {
         variant="outlined"
         color="secondary"
         onClick={() => navigate("/login")}
-        className="mb-3 w-50"
+        className={`mb-3 button-width`}
       >
         Login
       </Button>

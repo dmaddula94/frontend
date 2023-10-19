@@ -24,6 +24,7 @@ function ProfileInfo({ user }) {
   const [mobileNumber, setMobileNumber] = useState(phoneNumber);
   const [enableAlerts, setEnableAlerts] = useState(alerts);
   const [isCelsius, setIsCelsius] = useState(metric);
+  const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleEditClick = async () => {
     if (isEditing) {
@@ -53,10 +54,11 @@ function ProfileInfo({ user }) {
 
   return  (
     <Box
+    className={`d-flex flex-column justify-content-center glassbackground border-radius p-4 p-md-5 mobile-full-width`}
       sx={{
         padding: "20px",
-        maxWidth: "100%",
-        width: "100%",
+        // maxWidth: "100%",
+        // width: "100%",
         margin: "auto",
       }}
     >
@@ -142,8 +144,8 @@ function ProfileInfo({ user }) {
             </>
           )}
 
-          <Stack spacing={2} mt={2} direction="column" sx={{ width: "100%" }}>
-            <Button variant="contained" color="primary" onClick={handleEditClick} fullWidth>
+          <Stack spacing={2} mt={2} direction="column" alignItems="center" sx={{ width: "100%" }}>
+            <Button className={`button-width`} variant="contained" color="primary" onClick={handleEditClick} fullWidth>
               {isEditing ? "Save" : "Edit Profile"}
             </Button>
             {isEditing && (
@@ -151,7 +153,7 @@ function ProfileInfo({ user }) {
                 variant="contained"
                 color="primary"
                 onClick={() => setIsEditing(!isEditing)}
-                fullWidth
+                className={`button-width`}
               >
                 Cancel
               </Button>
