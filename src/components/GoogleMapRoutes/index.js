@@ -19,6 +19,10 @@ import MuiAlert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import tzlookup from "tz-lookup";
 import { DateTime } from "luxon";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 
 import { useDispatch, useSelector } from "react-redux";
 import { setLocation } from "../../redux/reducers/locationSlice";
@@ -46,6 +50,8 @@ export default function GoogleMapRoutes() {
   const initialCenter = { lat: location.latitude, lng: location.longitude };
   const [map, setMap] = useState(/** @type google.maps.Map */ (null));
   const initialZoom = 10;
+  const [travelMode, setTravelMode] = useState("DRIVING");
+  const [previousMarkers, setPreviousMarkers] = useState([]);
 
   const getUVIndexLabel = (uvIndex) => {
     if (uvIndex <= 3) {
@@ -121,10 +127,10 @@ export default function GoogleMapRoutes() {
     return weatherIcons[weatherCode] || "fas fa-question";
   };
 
-  const getWeatherDataHtml = (apiResponse, time) => {
+  const getWeatherDataHtml = (apiResponse, time,timeIndex) => {
     const hourly = apiResponse.hourly;
     const current = apiResponse.current_weather;
-    const index = hourly.time.indexOf(time);
+    const index = hourly.time.indexOf(timeIndex);
     const apparentTemp = hourly.apparent_temperature[index];
     const uvIndex = hourly.uv_index[index];
     const precipitationSum = hourly.precipitation[index];
@@ -132,7 +138,9 @@ export default function GoogleMapRoutes() {
 
     return `
       <div class="weather-data">
-        <div class="weather-data-time mb-2"><i class="fas fa-clock"></i> ${time.split("T").join(" ")}</div>
+        <div class="weather-data-time mb-2"><i class="fas fa-clock"></i> ${time
+          .split("T")
+          .join(" ")}</div>
         <div class="weather-data-temperature mb-2"><i class="fas fa-thermometer-half"></i> ${Math.round(
           current.temperature
         )} ${getMetricData() == "fahrenheit" ? "°F" : "°C"}</div>
@@ -184,13 +192,20 @@ export default function GoogleMapRoutes() {
   const handleFindRoute = async () => {
     try {
       setDirections(null);
+
+      // Clear previous markers and routes
+      // if (directions) {
+      //   directions.setMap(null);
+      // }
+      // previousMarkers.forEach((marker) => marker.setMap(null));
+
       // eslint-disable-next-line no-undef
       const directionsService = new google.maps.DirectionsService();
       const routes = await directionsService.route({
         origin: startLocationRef.current.value,
         destination: endLocationRef.current.value,
         // eslint-disable-next-line no-undef
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: google.maps.TravelMode[travelMode],
         drivingOptions: {
           departureTime: new Date(Date.now()),
           // eslint-disable-next-line no-undef
@@ -226,12 +241,22 @@ export default function GoogleMapRoutes() {
 
       const currentTime = DateTime.now()
         .setZone(startTimeZone)
+        .toFormat("yyyy-MM-dd HH:mm")
+
+      const endTime = DateTime.now()
+        .setZone(endTimeZone)
+        .plus({ hours: durationInHours })
+        .toFormat("yyyy-MM-dd HH:mm")
+
+      
+        const currentTimeIndex = DateTime.now()
+        .setZone(startTimeZone)
         .startOf("hour")
         .toFormat("yyyy-MM-dd,HH:mm")
         .split(",")
         .join("T");
 
-      const endTime = DateTime.now()
+      const endTimeIndex = DateTime.now()
         .setZone(endTimeZone)
         .startOf("hour")
         .plus({ hours: durationInHours })
@@ -267,7 +292,8 @@ export default function GoogleMapRoutes() {
 
         const stratLocWeatherDataText = getWeatherDataHtml(
           startLocationWeatherData,
-          currentTime
+          currentTime,
+          currentTimeIndex
         );
         const endLocationWeatherresponse = await fetch(
           endLocationWeatherAPIUrl
@@ -281,7 +307,8 @@ export default function GoogleMapRoutes() {
 
         const endLocWeatherDataText = getWeatherDataHtml(
           endLocationWeatherData,
-          endTime
+          endTime,
+          endTimeIndex
         );
         // create markers for start and end locations
         // eslint-disable-next-line no-undef
@@ -386,6 +413,7 @@ export default function GoogleMapRoutes() {
         });
         startMarker.setMap(map);
         endMarker.setMap(map);
+        // setPreviousMarkers([startMarker, endMarker]);
       } catch (error) {
         console.error("Error finding weather.", error);
         handleSnackBar("Error finding weather. Please try again.");
@@ -458,6 +486,9 @@ export default function GoogleMapRoutes() {
       <div className="mb-4 col-12 col-md-4">
         <Autocomplete>
           <TextField
+            style={{
+              paddingLeft: "10px",
+            }}
             fullWidth
             placeholder="Start location"
             inputRef={startLocationRef}
@@ -498,31 +529,45 @@ export default function GoogleMapRoutes() {
                   />
                 </InputAdornment>
               ),
-              startAdornment: (
-                <InputAdornment position="end">
-                  <LocationSearchingIcon
-                    style={{
-                      cursor: "pointer",
-                      color: sys_theme.palette.text.primary,
-                    }}
-                    onClick={getCurrentEndLocation}
-                  />
-                </InputAdornment>
-              ),
+              // startAdornment: (
+              //   <InputAdornment position="end">
+              //     <LocationSearchingIcon
+              //       style={{
+              //         cursor: "pointer",
+              //         color: sys_theme.palette.text.primary,
+              //       }}
+              //       onClick={getCurrentEndLocation}
+              //     />
+              //   </InputAdornment>
+              // ),
             }}
           />
         </Autocomplete>
       </div>
+      <div className="mb-4 col-12 col-md-2">
+        <FormControl fullWidth>
+          <InputLabel>Mode</InputLabel>
+          <Select
+            value={travelMode}
+            onChange={(e) => setTravelMode(e.target.value)}
+          >
+            <MenuItem value={"DRIVING"}>Driving</MenuItem>
+            <MenuItem value={"WALKING"}>Walking</MenuItem>
+            <MenuItem value={"BICYCLING"}>Bicycling</MenuItem>
+            <MenuItem value={"TRANSIT"}>Transit</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
       <div
-        className="mb-4 col-12 col-md-4"
+        className="mb-4 col-12 col-md-2"
         style={{ display: "flex", justifyContent: "center" }}
       >
         <Button
-          className={`button-width`}
           variant="contained"
           color="primary"
           onClick={handleFindRoute}
           fullWidth
+          style={{ width: "100%", height: "100%" }}
         >
           Find Route
         </Button>
@@ -553,6 +598,8 @@ export default function GoogleMapRoutes() {
             }}
             onLoad={handleMapLoad}
           >
+            <TrafficLayer autoUpdate />
+
             {directions && <DirectionsRenderer directions={directions} />}
           </GoogleMap>
         )}
