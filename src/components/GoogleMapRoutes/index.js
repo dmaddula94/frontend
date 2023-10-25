@@ -193,6 +193,8 @@ export default function GoogleMapRoutes() {
     try {
       setDirections(null);
 
+      console.log('MAP', map);
+
       // Clear previous markers and routes
       // if (directions) {
       //   directions.setMap(null);

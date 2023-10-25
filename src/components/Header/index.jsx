@@ -19,6 +19,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"; // Arrow icon
 import { useDispatch, useSelector } from "react-redux";
 import { setDarkMode } from "../../redux/reducers/themeSlice";
 import { logout } from "../../redux/reducers/userSlice";
+import { setBackground } from "../../redux/reducers/weatherSlice";
 import "./index.scss";
 import Search from "../Search";
 
@@ -35,6 +36,7 @@ function Header() {
   };
 
   const redirectToProfile = () => {
+    dispatch(setBackground({ background: "default" }));
     setIsMenuOpen(false);
     navigate("/profile");
   };
@@ -51,6 +53,7 @@ function Header() {
   };
 
   const handleShowRoutes = () => {
+    dispatch(setBackground({ background: "default" }));
     setIsMenuOpen(false);
     navigate("/show-routes");
   };
