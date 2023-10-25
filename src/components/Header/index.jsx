@@ -85,6 +85,11 @@ function Header() {
     handleClose();
     navigate("/");
   };
+  const handleShowRoutes = () => {
+    dispatch(setBackground({ background: "default" }));
+    handleClose();
+    navigate("/show-routes");
+  };
 
   const redirectToHomePage = () => {
     navigate("/");
@@ -146,6 +151,7 @@ function Header() {
                   <MenuItem onClick={redirectToProfile}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>
                   <MenuItem onClick={handleDashboard}>Dashboard</MenuItem>
+                  <MenuItem onClick={handleShowRoutes}>Show Routes</MenuItem>
                 </Menu>
               </>
             )}

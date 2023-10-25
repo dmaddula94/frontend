@@ -3,6 +3,11 @@
   justify-content: space-between;
   padding: 20px;
   background-color: #f8f8f8;
+
+  @media  only screen and (max-width: 768px) {
+    padding: 20px 0;
+  }
+
   &.dark {
     background-color: #333;
     color: #fff;
@@ -16,6 +21,10 @@
   .logo-container {
     .logo {
       width: 150px;
+
+      @media screen and (max-width: 768px) {
+        width: 100px;
+      }
     }
   }
   .right-section {

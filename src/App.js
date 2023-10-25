@@ -19,6 +19,7 @@ import Footer from "./components/Footer";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import ChatBot from "./components/ChatBot";
+import GoogleMapRoutes from "./components/GoogleMapRoutes";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -63,6 +64,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/show-routes"
+                  element={
+                    <ProtectedRoute>
+                      <GoogleMapRoutes />
                     </ProtectedRoute>
                   }
                 />

@@ -1,7 +1,7 @@
 import {store} from "../redux/store";
 import tzlookup from "tz-lookup";
 
-const getMetricData = () => {
+export const getMetricData = () => {
   return (store.getState())?.user?.user?.metric ? 'celsius' : 'fahrenheit';
 }
 
@@ -9,7 +9,7 @@ const getLocation = () => {
   return store.getState().location;
 }
 
-const getTimeZone = () => {
+export const getTimeZone = () => {
   return tzlookup(getLocation().latitude, getLocation().longitude);
 }
 
