@@ -1,93 +1,57 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   ToggleButton,
   Fade,
-  Menu,
-  MenuItem,
-  // TextField,
-  // InputAdornment,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-// import { useTheme } from "@mui/material/styles";
-// import SearchIcon from "@mui/icons-material/Search";
-// import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
-// import { StandaloneSearchBox } from "@react-google-maps/api";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close"; // Close icon
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"; // Arrow icon
 import { useDispatch, useSelector } from "react-redux";
-// import { setLocation } from "../../redux/reducers/locationSlice";
 import { setDarkMode } from "../../redux/reducers/themeSlice";
-import { setBackground } from "../../redux/reducers/weatherSlice";
 import { logout } from "../../redux/reducers/userSlice";
 import "./index.scss";
 import Search from "../Search";
 
 function Header() {
   const dispatch = useDispatch();
-  // const location = useSelector((state) => state.location);
-  // const sys_theme = useTheme();
   const navigate = useNavigate();
   const routeLocation = useLocation();
   const theme = useSelector((state) => state.theme);
   const user = useSelector((state) => state.user);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const searchBoxRef = useRef();
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // const onPlacesChanged = useCallback(() => {
-  //   const places = searchBoxRef.current.getPlaces();
-  //   const place = places[0];
-  //   if (place) {
-  //     const {
-  //       name,
-  //       geometry: { location },
-  //     } = place;
-  //     dispatch(
-  //       setLocation({
-  //         latitude: location.lat(),
-  //         longitude: location.lng(),
-  //         name: name,
-  //       })
-  //     );
-
-  //     setSearchQuery(name);
-  //   }
-  // }, []);
-
-  // const getCurrentLocation = () => {
-  //   dispatch(setLocation(location.current));
-  //   setSearchQuery(location.current.name);
-  // };
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   const redirectToProfile = () => {
-    dispatch(setBackground({ background: "default" }));
-    handleClose();
+    setIsMenuOpen(false);
     navigate("/profile");
   };
 
   const handleLogout = () => {
-    setAnchorEl(null);
+    setIsMenuOpen(false);
     sessionStorage.clear();
     dispatch(logout());
   };
+
   const handleDashboard = () => {
-    dispatch(setBackground({ background: "default" }));
-    handleClose();
+    setIsMenuOpen(false);
     navigate("/");
   };
+
   const handleShowRoutes = () => {
-    dispatch(setBackground({ background: "default" }));
-    handleClose();
+    setIsMenuOpen(false);
     navigate("/show-routes");
   };
 
@@ -100,7 +64,7 @@ function Header() {
   return (
     <header className={`header ${theme.darkMode ? "dark" : "light"}`}>
       <div className="container">
-        <div className={!isDesktop ? "logo-container" : "logo-container"}>
+        <div className="logo-container">
           <img
             src={`${theme.darkMode ? "/logo.svg" : "/logo-dark.svg"}`}
             alt="Marist Weather Dashboard Logo"
@@ -113,7 +77,7 @@ function Header() {
         </div>
         <div className="right-section">
           {user.isAuthenticated && (
-            <div  className="location-search mobile-hide">
+            <div className="location-search mobile-hide">
               <Search />
             </div>
           )}
@@ -131,30 +95,99 @@ function Header() {
                 }}
                 style={{
                   borderRadius: "50%",
+                  backgroundColor: "transparent",
+                  border: "none",
                 }}
               >
                 {theme.darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
               </ToggleButton>
             </Fade>
-            {user.isAuthenticated && (
-              <>
-                <AccountCircleIcon
-                  onClick={handleMenu}
-                  className="profile-icon"
-                />
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
+            <>
+              <IconButton onClick={toggleMenu} className="menu-icon">
+                <MenuIcon />
+              </IconButton>
+              <Drawer
+                anchor="right"
+                open={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+              >
+                <div
+                  style={{ width: isMenuOpen ? "100%" : "15%" }}
+                  className="menu"
                 >
-                  <MenuItem onClick={redirectToProfile}>Profile</MenuItem>
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                  <MenuItem onClick={handleDashboard}>Dashboard</MenuItem>
-                  <MenuItem onClick={handleShowRoutes}>Show Routes</MenuItem>
-                </Menu>
-              </>
-            )}
+                  <div className="close-icon">
+                    <IconButton onClick={() => setIsMenuOpen(false)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </div>
+                  <List>
+                    {user.isAuthenticated && (
+                      <>
+                        <ListItem
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                          button
+                          onClick={redirectToProfile}
+                        >
+                          <ListItemText primary="Profile" />
+                          <ListItemIcon>
+                            <ChevronRightIcon />
+                          </ListItemIcon>
+                        </ListItem>
+                        <Divider />
+                        <ListItem
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                          button
+                          onClick={handleLogout}
+                        >
+                          <ListItemText primary="Logout" />
+                          <ListItemIcon>
+                            <ChevronRightIcon />
+                          </ListItemIcon>
+                        </ListItem>
+                        <Divider />
+                      </>
+                    )}
+                    <ListItem
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                      button
+                      onClick={handleDashboard}
+                    >
+                      <ListItemText primary="Dashboard" />
+                      <ListItemIcon>
+                        <ChevronRightIcon />
+                      </ListItemIcon>
+                    </ListItem>
+                    <Divider />
+                    <ListItem
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                      button
+                      onClick={handleShowRoutes}
+                    >
+                      <ListItemText primary="Show Routes" />
+                      <ListItemIcon>
+                        <ChevronRightIcon />
+                      </ListItemIcon>
+                    </ListItem>
+                  </List>
+                </div>
+              </Drawer>
+            </>
           </div>
         </div>
       </div>
