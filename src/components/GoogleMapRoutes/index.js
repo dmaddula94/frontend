@@ -285,12 +285,12 @@ export default function GoogleMapRoutes() {
         const startLocationWeatherData =
           await startLocationWeatherresponse.json();
         console.log("start location Weather Data ", startLocationWeatherData);
-        // const stratLocWeatherDataText = getWeatherDataText(
+        // const startLocWeatherDataText = getWeatherDataText(
         //   startLocationWeatherData,
         //   currentTime
         // );
 
-        const stratLocWeatherDataText = getWeatherDataHtml(
+        const startLocWeatherDataText = getWeatherDataHtml(
           startLocationWeatherData,
           currentTime,
           currentTimeIndex
@@ -315,7 +315,7 @@ export default function GoogleMapRoutes() {
         const startMarker = new google.maps.Marker({
           position: route.legs[0].start_location,
           map: map,
-          title: stratLocWeatherDataText,
+          title: startLocWeatherDataText,
           icon: {
             url: "https://icons-for-free.com/iconfiles/png/512/cloudy+day+forecast+sun+sunny+weather+icon-1320195254084556383.png",
             //eslint-disable-next-line no-undef
@@ -348,9 +348,9 @@ export default function GoogleMapRoutes() {
           // eslint-disable-next-line no-undef
           const infoWindow = new google.maps.InfoWindow({
             content:
-              '<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">Weather Forecast</h6>' +
-              endLocWeatherDataText +
-              "</div>",
+              `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${routes.request.destination.query}</h6>
+              ${endLocWeatherDataText}
+              </div>`,
           });
 
           infoWindow.open(map, endMarker);
@@ -380,16 +380,16 @@ export default function GoogleMapRoutes() {
           // const infoWindow = new google.maps.InfoWindow({
           //   content:
           //     '<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">Weather Forecast</h6><p style="margin: 0;">' +
-          //     stratLocWeatherDataText +
+          //     startLocWeatherDataText +
           //     "</p></div>",
           // });
 
           // eslint-disable-next-line no-undef
           const infoWindow = new google.maps.InfoWindow({
             content:
-              '<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">Weather Forecast</h6>' +
-              stratLocWeatherDataText +
-              "</div>",
+              `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${routes.request.origin.query}</h6>
+              ${startLocWeatherDataText}
+              </div>`,
           });
 
           infoWindow.open(map, startMarker);
