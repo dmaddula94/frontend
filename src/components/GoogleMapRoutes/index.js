@@ -129,8 +129,8 @@ export default function GoogleMapRoutes() {
 
   const getWeatherDataHtml = (apiResponse, time,timeIndex) => {
     const hourly = apiResponse.hourly;
-    const current = apiResponse.current_weather;
     const index = hourly.time.indexOf(timeIndex);
+    const current = hourly.temperature_2m[index];
     const apparentTemp = hourly.apparent_temperature[index];
     const uvIndex = hourly.uv_index[index];
     const precipitationSum = hourly.precipitation[index];
@@ -142,7 +142,7 @@ export default function GoogleMapRoutes() {
           .split("T")
           .join(" ")}</div>
         <div class="weather-data-temperature mb-2"><i class="fas fa-thermometer-half"></i> ${Math.round(
-          current.temperature
+          current
         )} ${getMetricData() == "fahrenheit" ? "°F" : "°C"}</div>
         <div class="weather-data-feels-like mb-2"><i class="fas fa-thermometer-empty"></i> Feels Like: ${Math.round(
           apparentTemp
@@ -278,6 +278,8 @@ export default function GoogleMapRoutes() {
         durationInDays,
         endTimeZone
       );
+
+      console.log("END INDEX", endTimeIndex);
 
       try {
         setIsLoadingWeatherData(true);
