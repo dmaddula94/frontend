@@ -128,22 +128,23 @@ export default function GoogleMapRoutes() {
     return weatherIcons[weatherCode] || 'fas fa-question';
   };
 
-  const getWeatherDataHtml = (apiResponse, time, timeIndex) => {
+  const getWeatherDataHtml = (apiResponse, time, timeIndex, city) => {
     const hourly = apiResponse.hourly;
-    const current = apiResponse.current_weather;
+    // const current = apiResponse.current_weather;
     const index = hourly.time.indexOf(timeIndex);
+    const current = hourly.temperature_2m[index];
     const apparentTemp = hourly.apparent_temperature[index];
     const uvIndex = hourly.uv_index[index];
     const precipitationSum = hourly.precipitation[index];
     const weatherCode = hourly.weathercode[index];
 
+    console.log(`city: ${city} :::: timeIndex: ${timeIndex} ::::: index: ${index} :::: ${current}`);
+
     return `
       <div class="weather-data">
-        <div class="weather-data-time mb-2"><i class="fas fa-clock"></i> ${time
-          .split('T')
-          .join(' ')}</div>
+        <div class="weather-data-time mb-2"><i class="fas fa-clock"></i> ${time}</div>
         <div class="weather-data-temperature mb-2"><i class="fas fa-thermometer-half"></i> ${Math.round(
-          current.temperature
+          current
         )} ${getMetricData() == 'fahrenheit' ? '°F' : '°C'}</div>
         <div class="weather-data-feels-like mb-2"><i class="fas fa-thermometer-empty"></i> Feels Like: ${Math.round(
           apparentTemp
@@ -336,7 +337,7 @@ export default function GoogleMapRoutes() {
           endTimeIndex
         );
         let len = route.legs[0].steps?.length;
-        let incrBy = Math.round(len / 10);
+        let incrBy = Math.round(len / 15);
 
         for (let i = 0; i < len; i = i + incrBy) {
           let step = route.legs[0].steps[i];
@@ -349,18 +350,26 @@ export default function GoogleMapRoutes() {
           // console.log('Accumulated Duration (seconds) to step', i, ':', accumulatedDuration);
           let lat = step.start_location.lat();
           let lng = step.end_location.lng();
-          let city = '';
+          let address = '';
           const geocoder = new google.maps.Geocoder();
           const latlng = { lat: lat, lng: lng };
           geocoder.geocode({ location: latlng }, (results, status) => {
             if (status === "OK") {
               if (results[0]) {
                 const addressComponents = results[0].address_components;
+                let city = '';
+                let state = '';
                 for (let i = 0; i < addressComponents.length; i++) {
                   const types = addressComponents[i].types;
                   if (types.includes("locality")) {
                     city = addressComponents[i].long_name;
                   }
+
+                  if (types.includes("administrative_area_level_1")) {
+                    state = addressComponents[i].short_name;
+                  }
+
+                  address = `${city}, ${state}`;
                 }
               } else {
                 console.log("No results found");
@@ -372,10 +381,10 @@ export default function GoogleMapRoutes() {
           // const dInHours = convertDurationToHours(
           //   step.duration.text
           // );
-          const dInHours = accumulatedDuration / 3600
-          // let dInDays = convertDurationToDays(step.duration.text);
+          const dInHours = Math.round(accumulatedDuration / 3600)
+          let dInDays = Math.ceil(dInHours / 24) + 1
           let tZone = tzlookup(lat, lng);
-          let weatherAPIUrl = getWeatherApiURL(lat, lng, 2, tZone);
+          let weatherAPIUrl = getWeatherApiURL(lat, lng, dInDays, tZone);
 
           let weatherResponse = await fetch(weatherAPIUrl);
           let locationWeatherData = await weatherResponse.json();
@@ -390,13 +399,16 @@ export default function GoogleMapRoutes() {
             .toFormat('yyyy-MM-dd,HH:mm')
             .split(',')
             .join('T');
-            // console.log('LOCATION WEATHER DATA', locationWeatherData);
+            // console.log(city)
+            // console.log('DURATION', dInHours)
+            console.log('LOCATION WEATHER DATA', locationWeatherData);
             // console.log('TIME', time_);
             // console.log('TIME INDEX', timeIndex);
           const weatherDataText = getWeatherDataHtml(
             locationWeatherData,
             time_,
-            timeIndex
+            timeIndex,
+            address
           );
           // create markers for start and end locations
           // eslint-disable-next-line no-undef
@@ -414,7 +426,7 @@ export default function GoogleMapRoutes() {
           newMarker.addListener('click', function () {
             // eslint-disable-next-line no-undef
             const infoWindow = new google.maps.InfoWindow({
-              content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${city}</h6>
+              content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${address}</h6>
                 ${weatherDataText}
                 </div>`,
             });
