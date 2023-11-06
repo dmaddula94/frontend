@@ -336,20 +336,33 @@ export default function GoogleMapRoutes() {
           endTime,
           endTimeIndex
         );
+        
+        let numWaypoints = 15;
         let len = route.legs[0].steps?.length;
-        let incrBy = Math.round(len / 15);
+        console.log("Steps: " + len)
+        //let incrBy = Math.round(len / 15);
+        //console.log("Increment by: " + incrBy)
+        let accumulatedDuration = 0;
+        let durationStep = route.legs[0].duration?.value / numWaypoints;
+        let nextDurationMilestone = durationStep;
+        console.log("Duration step: " + durationStep);
 
-        for (let i = 0; i < len; i = i + incrBy) {
+        for (let i = 0; i < len; i++) {
           let step = route.legs[0].steps[i];
-          let accumulatedDuration = 0;
+          accumulatedDuration += step.duration.value;
 
-          for (let j = 0; j < i; j++) {
-            accumulatedDuration += route.legs[0].steps[j].duration.value;
+          if (accumulatedDuration < nextDurationMilestone) {
+            continue;
+          } else {
+            while (accumulatedDuration >= nextDurationMilestone) {
+              nextDurationMilestone += durationStep;
+            }
           }
 
-          // console.log('Accumulated Duration (seconds) to step', i, ':', accumulatedDuration);
+          console.log("Next milestone: " + nextDurationMilestone)
+
           let lat = step.start_location.lat();
-          let lng = step.end_location.lng();
+          let lng = step.start_location.lng();
           let address = '';
           const geocoder = new google.maps.Geocoder();
           const latlng = { lat: lat, lng: lng };
