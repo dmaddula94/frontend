@@ -31,6 +31,7 @@ import { setLocation } from '../../redux/reducers/locationSlice';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import { prettyPrintWeatherCode } from '../../utils/weather';
 import { getMetricData, getTimeZone } from '../../utils/openmeteo';
+import { askQuestion } from '../../utils/openai';
 
 export default function GoogleMapRoutes() {
   const startLocationRef = useRef();
@@ -568,6 +569,32 @@ export default function GoogleMapRoutes() {
         startMarker.setMap(map);
         endMarker.setMap(map);
         // setPreviousMarkers([startMarker, endMarker]);
+
+        // Ask ChatGPT question
+        const findAttractions = false;
+
+        if (findAttractions) {
+          // Format the question
+          const question = `What are the top 10 tourist attractions en route from 
+            ${startLocationRef.current.value} to ${endLocationRef.current.value}? 
+            Separate location and description with a colon.`;
+
+          // Ask the question to ChatGPT and split the response into an array
+          console.log(question);
+          const content = await askQuestion(question);
+          const attractionArray = content.split(/\s*\d+\.\s*/);
+          attractionArray.shift();
+
+          console.log(attractionArray);
+
+          // Go through the array and process each list element
+          attractionArray.forEach(element => {
+            const location = element.split(":");
+            // location[0] is the location name, location[1] is the description
+            console.log(location[0] + " --> " + location[1]);
+          });
+        }
+
       } catch (error) {
         console.error('Error finding weather.', error);
         handleSnackBar('Error finding weather. Please try again.');
