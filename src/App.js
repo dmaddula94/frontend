@@ -1,6 +1,7 @@
 import React from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { useSelector } from "react-redux";
+import { useState } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,6 +21,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import ChatBot from "./components/ChatBot";
 import GoogleMapRoutes from "./components/GoogleMapRoutes";
+import Notification from "./components/Notification";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -31,11 +33,46 @@ function App() {
   const theme = useSelector((state) => state.theme);
   const weather = useSelector((state) => state.weather);
   const [showChatbot, setShowChatbot] = React.useState(false);
+  React.useEffect(() => {
+    console.log("adding listener for weather alerts");
+    const handleMessage = (event) => {
+      const message = event.data;
+      if(message?.type === "weather-alert"){
+        setWeatherAlert(message.data);
+        setShowWeatherAlert(true);
+      }
+      if(message?.type === "weather-insight"){
+        setWeatherInsight(message.data);
+        setShowWeatherInsight(true);
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+  
 
   React.useEffect(() => {
     document.body.className = ''; // Clear any existing classes
     document.body.classList.add(`${theme.darkMode ? "dark-mode" : "light-mode"}`); // Add the current theme as a class
   }, [theme]);
+  const [showWeatherAlert, setShowWeatherAlert] = useState(false);
+  const [showWeatherInsight, setShowWeatherInsight] = useState(false);
+  const [weatherAlert, setWeatherAlert] = useState("");
+  const [weatherInsight, setWeatherInsight] = useState("");
+  const handleWeatherAlertClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setShowWeatherAlert(false);
+  };
+  const handleWeatherInsightClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setShowWeatherInsight(false);
+  };
 
 
   return (
@@ -58,6 +95,8 @@ function App() {
             <Header />
             {/* <ChatBot /> */}
             <div className="container">
+            <Notification message={weatherAlert} open={showWeatherAlert} onClose={handleWeatherAlertClose}></Notification>
+            <Notification message={weatherInsight} open={showWeatherInsight} onClose={handleWeatherInsightClose}></Notification>
               <Routes>
                 <Route
                   path="/"
@@ -71,6 +110,7 @@ function App() {
                   path="/show-routes"
                   element={
                     <ProtectedRoute>
+                     
                       <GoogleMapRoutes />
                     </ProtectedRoute>
                   }
