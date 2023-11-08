@@ -7,7 +7,13 @@ import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
 import api from "../../api";
-import { Stack } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+} from "@mui/material";
 import { Switch } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { update } from "../../redux/reducers/userSlice";
@@ -16,14 +22,25 @@ import { useSnackbar } from "notistack";
 function ProfileInfo({ user }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { firstName, lastName, phoneNumber, email, alerts, metric } = user;
+  const {
+    firstName,
+    lastName,
+    phoneNumber,
+    email,
+    alerts,
+    metric,
+    insights,
+    alertPreference,
+  } = user;
 
   const [isEditing, setIsEditing] = useState(false);
   const [userFirstname, setUserFirstName] = useState(firstName);
   const [userLastName, setUserLastName] = useState(lastName);
+  const [weatherAlertPref, setWeatherAlertPref] = useState("");
   const [mobileNumber, setMobileNumber] = useState(phoneNumber);
   const [enableAlerts, setEnableAlerts] = useState(alerts);
   const [isCelsius, setIsCelsius] = useState(metric);
+  const [enableInsights, setEnableInsights] = useState(insights);
   const [isDesktop] = useState(window.innerWidth > 768);
 
   const handleEditClick = async () => {
@@ -36,6 +53,8 @@ function ProfileInfo({ user }) {
           phoneNumber: mobileNumber,
           alerts: enableAlerts,
           metric: isCelsius,
+          insights: enableInsights,
+          // alertPreference: weatherAlertPref,
         });
         enqueueSnackbar("Profile Updated!", { variant: "success" });
         dispatch(update({ user: response.data }));
@@ -52,9 +71,9 @@ function ProfileInfo({ user }) {
     setIsCelsius(event.target.checked);
   };
 
-  return  (
+  return (
     <Box
-    className={`d-flex flex-column justify-content-center glassbackground border-radius p-4 p-md-5 mobile-full-width`}
+      className={`d-flex flex-column justify-content-center glassbackground border-radius p-4 p-md-5 mobile-full-width`}
       sx={{
         padding: "20px",
         // maxWidth: "100%",
@@ -110,25 +129,89 @@ function ProfileInfo({ user }) {
                 margin="normal"
                 fullWidth
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isCelsius}
-                    onChange={handleToggle}
-                    color="primary"
-                  />
-                }
-                label={isCelsius ? "°C" : "°F"}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={enableAlerts}
-                    onChange={() => setEnableAlerts(!enableAlerts)}
-                  />
-                }
-                label="Enable Text and Email Alerts"
-              />
+              <FormControl
+                variant="standard"
+                sx={{ m: 2, minWidth: 120, width: "100%" }}
+              >
+                <InputLabel id="weather-dropdown-label">
+                  Weather Alert Preference
+                </InputLabel>
+                <Select
+                  labelId="weather-dropdown-label"
+                  id="weather-dropdown"
+                  value={weatherAlertPref}
+                  onChange={(e) => {
+                    setWeatherAlertPref(e?.target?.value);
+                    window.localStorage.setItem(
+                      "preferences",
+                      JSON.stringify({
+                        ea: enableAlerts,
+                        eap: e?.target?.value,
+                      })
+                    );
+                    window.postMessage({
+                      type: "preferences",
+                      data: { ea: enableAlerts, eap: e?.target?.value },
+                    });
+                  }}
+                  label="Weather"
+                >
+                  <MenuItem value="Clear">Clear</MenuItem>
+                  <MenuItem value="Bright">Bright</MenuItem>
+                  <MenuItem value="Cloudy">Cloudy</MenuItem>
+                  <MenuItem value="Fog">Fog</MenuItem>
+                  <MenuItem value="Rain">Rain</MenuItem>
+                  <MenuItem value="Snow">Snow</MenuItem>
+                  <MenuItem value="Drizzle">Drizzle</MenuItem>
+                  <MenuItem value="Thunderstorm">Thunderstorm</MenuItem>
+                </Select>
+              </FormControl>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isCelsius}
+                      onChange={handleToggle}
+                      color="primary"
+                    />
+                  }
+                  label={isCelsius ? "°C" : "°F"}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={enableInsights}
+                      onChange={() => {
+                        setEnableInsights(!enableInsights);
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label={"Enable Insights"}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={enableAlerts}
+                      onChange={() => {
+                        window.localStorage.setItem(
+                          "preferences",
+                          JSON.stringify({
+                            ea: !enableAlerts,
+                            eap: weatherAlertPref,
+                          })
+                        );
+                        window.postMessage({
+                          type: "preferences",
+                          data: { ea: !enableAlerts, eap: weatherAlertPref },
+                        });
+                        setEnableAlerts(!enableAlerts);
+                      }}
+                    />
+                  }
+                  label="Enable Text and Email Alerts"
+                />
+              </div>
             </>
           ) : (
             <>
@@ -144,8 +227,20 @@ function ProfileInfo({ user }) {
             </>
           )}
 
-          <Stack spacing={2} mt={2} direction="column" alignItems="center" sx={{ width: "100%" }}>
-            <Button className={`button-width`} variant="contained" color="primary" onClick={handleEditClick} fullWidth>
+          <Stack
+            spacing={2}
+            mt={2}
+            direction="column"
+            alignItems="center"
+            sx={{ width: "100%" }}
+          >
+            <Button
+              className={`button-width`}
+              variant="contained"
+              color="primary"
+              onClick={handleEditClick}
+              fullWidth
+            >
               {isEditing ? "Save" : "Edit Profile"}
             </Button>
             {isEditing && (
@@ -163,7 +258,6 @@ function ProfileInfo({ user }) {
       </Box>
     </Box>
   );
-   
 }
 
 export default ProfileInfo;
