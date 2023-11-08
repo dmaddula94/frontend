@@ -31,6 +31,7 @@ import { setLocation } from '../../redux/reducers/locationSlice';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import { prettyPrintWeatherCode } from '../../utils/weather';
 import { getMetricData, getTimeZone } from '../../utils/openmeteo';
+import { askQuestion } from '../../utils/openai';
 
 export default function GoogleMapRoutes() {
   const startLocationRef = useRef();
@@ -336,20 +337,33 @@ export default function GoogleMapRoutes() {
           endTime,
           endTimeIndex
         );
+        
+        let numWaypoints = 15;
         let len = route.legs[0].steps?.length;
-        let incrBy = Math.round(len / 15);
+        console.log("Steps: " + len)
+        //let incrBy = Math.round(len / 15);
+        //console.log("Increment by: " + incrBy)
+        let accumulatedDuration = 0;
+        let durationStep = route.legs[0].duration?.value / numWaypoints;
+        let nextDurationMilestone = durationStep;
+        console.log("Duration step: " + durationStep);
 
-        for (let i = 0; i < len; i = i + incrBy) {
+        for (let i = 0; i < len; i++) {
           let step = route.legs[0].steps[i];
-          let accumulatedDuration = 0;
+          accumulatedDuration += step.duration.value;
 
-          for (let j = 0; j < i; j++) {
-            accumulatedDuration += route.legs[0].steps[j].duration.value;
+          if (accumulatedDuration < nextDurationMilestone) {
+            continue;
+          } else {
+            while (accumulatedDuration >= nextDurationMilestone) {
+              nextDurationMilestone += durationStep;
+            }
           }
 
-          // console.log('Accumulated Duration (seconds) to step', i, ':', accumulatedDuration);
+          console.log("Next milestone: " + nextDurationMilestone)
+
           let lat = step.start_location.lat();
-          let lng = step.end_location.lng();
+          let lng = step.start_location.lng();
           let address = '';
           const geocoder = new google.maps.Geocoder();
           const latlng = { lat: lat, lng: lng };
@@ -555,6 +569,32 @@ export default function GoogleMapRoutes() {
         startMarker.setMap(map);
         endMarker.setMap(map);
         // setPreviousMarkers([startMarker, endMarker]);
+
+        // Ask ChatGPT question
+        const findAttractions = false;
+
+        if (findAttractions) {
+          // Format the question
+          const question = `What are the top 10 tourist attractions en route from 
+            ${startLocationRef.current.value} to ${endLocationRef.current.value}? 
+            Separate location and description with a colon.`;
+
+          // Ask the question to ChatGPT and split the response into an array
+          console.log(question);
+          const content = await askQuestion(question);
+          const attractionArray = content.split(/\s*\d+\.\s*/);
+          attractionArray.shift();
+
+          console.log(attractionArray);
+
+          // Go through the array and process each list element
+          attractionArray.forEach(element => {
+            const location = element.split(":");
+            // location[0] is the location name, location[1] is the description
+            console.log(location[0] + " --> " + location[1]);
+          });
+        }
+
       } catch (error) {
         console.error('Error finding weather.', error);
         handleSnackBar('Error finding weather. Please try again.');
