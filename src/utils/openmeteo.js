@@ -318,8 +318,6 @@ export const getWeatherDataHtml = (apiResponse, time, timeIndex, city) => {
   const windSpeed = hourly.windspeed_10m[index];
   const isDay = apiResponse.current_weather.is_day;
 
-  debugger;
-
   console.log(
     `city: ${city} :::: timeIndex: ${timeIndex} ::::: index: ${index} :::: ${current}`
   );
@@ -444,41 +442,42 @@ function getWeatherQuote(weatherCode) {
   }
 }
 
-function getWeatherAdvice({ uvIndex, precipitation, windSpeed, temperature, weatherCode, isDay }) {
+function getWeatherAdvice(uvIndex, precipitation, windSpeed, temperature, weatherCode, isDay ) {
   const metric = store.getState()?.user?.user?.metric;
+  const settings = store.getState()?.user?.user?.settings;
   let messages = [];
 
   if (metric) {
     // Temperature advice in Celsius
-    if (temperature < 0) {
+    if (temperature < settings.temperature.minC) {
       messages.push(
-        "It's freezing (below 0°C). Dress in layers and stay warm."
+        `<i class="fa-solid fa-temperature-low"></i> It's freezing (below ${settings.temperature.minC}°C). Dress in layers and stay warm.`
       );
-    } else if (temperature < 20) {
-      messages.push("It's cool (below 20°C). Consider wearing a jacket.");
-    } else if (temperature > 30) {
+    } else if (temperature < (settings.temperature.minC + settings.temperature.maxC) / 2) {
+      messages.push(`<i class="fa-solid fa-temperature-arrow-down"></i> It's cool (below ${(settings.temperature.minC + settings.temperature.maxC) / 2}°C). Consider wearing a jacket.`);
+    } else if (temperature > settings.temperature.maxC) {
       messages.push(
-        "It's hot (above 30°C). Stay hydrated and avoid strenuous activities in the heat."
+        `<i class="fa-solid fa-temperature-high"></i> It's hot (above ${settings.temperature.maxC}°C). Stay hydrated and avoid strenuous activities in the heat.`
       );
     }
   } else {
     // Temperature advice in Fahrenheit
-    if (temperature < 32) {
-      messages.push("It's freezing (below 32°F). Dress in layers and stay warm.");
-    } else if (temperature < 68) {
-      messages.push("It's cool (below 68°F). Consider wearing a jacket.");
-    } else if (temperature > 86) {
+    if (temperature < settings.temperature.min) {
+      messages.push(`<i class="fa-solid fa-temperature-low"></i> It's freezing (below ${settings.temperature.min}°F). Dress in layers and stay warm.`);
+    } else if (temperature < (settings.temperature.min + settings.temperature.max) / 2) {
+      messages.push(`<i class="fa-solid fa-temperature-arrow-down"></i> It's cool (below ${(settings.temperature.min + settings.temperature.max) / 2}°F). Consider wearing a jacket.`);
+    } else if (temperature > settings.temperature.max) {
       messages.push(
-        "It's hot (above 86°F). Stay hydrated and avoid strenuous activities in the heat."
+        `<i class="fa-solid fa-temperature-high"></i> It's hot (above ${settings.temperature.max}°F). Stay hydrated and avoid strenuous activities in the heat.`
       );
     }
   }
 
   // UV Index advice
   if (isDay) {
-    if (uvIndex > 7) {
+    if (uvIndex > settings.uvIndex.max) {
       messages.push("It's very sunny. Wear sunscreen and a hat.");
-    } else if (uvIndex > 3) {
+    } else if (uvIndex > settings.uvIndex.min) {
       messages.push("The sun is moderate. Seek shade during midday hours.");
     } else {
       messages.push("UV levels are low. Enjoy your day, but stay protected.");
@@ -486,11 +485,11 @@ function getWeatherAdvice({ uvIndex, precipitation, windSpeed, temperature, weat
   }
 
   // Precipitation advice
-  if (precipitation > 50) {
+  if (precipitation > settings.precipitation.max) {
     messages.push(
       "Heavy rain expected. Don't forget an umbrella and waterproof clothing."
     );
-  } else if (precipitation > 20) {
+  } else if (precipitation > settings.precipitation.min) {
     messages.push("Light rain is coming. A raincoat might be a good idea.");
   } else if (precipitation > 0) {
     messages.push(
@@ -499,11 +498,11 @@ function getWeatherAdvice({ uvIndex, precipitation, windSpeed, temperature, weat
   }
 
   // Wind advice
-  if (windSpeed > 25) {
+  if (windSpeed > settings.windSpeed.max) {
     messages.push(
       "It's very windy. Secure loose items and be careful if driving."
     );
-  } else if (windSpeed > 10) {
+  } else if (windSpeed > settings.windSpeed.min) {
     messages.push("It's a bit breezy. A windbreaker might be necessary.");
   }
 

@@ -213,7 +213,8 @@ function Weather({ lat, lon, location }) {
     const endOfDay = DateTime.now().setZone(timezone).endOf("day");
     const arr = data.filter((item) => {
       const itemDatetime = DateTime.fromISO(item.time, { zone: timezone });
-      return itemDatetime >= currentDate && itemDatetime <= endOfDay;
+      return itemDatetime >= currentDate
+      // return itemDatetime >= currentDate && itemDatetime <= endOfDay;
     });
 
     return arr;

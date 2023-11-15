@@ -320,6 +320,21 @@ function Header() {
                         <ChevronRightIcon />
                       </ListItemIcon>
                     </ListItem>
+                    <Divider />
+                    <ListItem
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      button
+                      onClick={() => navigate('/weather-dashboard')}
+                    >
+                      <ListItemText primary="Weather Dashboard" />
+                      <ListItemIcon>
+                        <ChevronRightIcon />
+                      </ListItemIcon>
+                    </ListItem>
                     {/* <Divider />
                     <ListItem
                       style={{

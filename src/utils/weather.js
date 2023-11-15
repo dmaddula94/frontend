@@ -200,6 +200,11 @@ export const formatTime = (time) => {
   return `${display}${suffix}`;
 };
 
+export const formatDate = (time) => {
+  const date = new Date(time);
+  return date.toLocaleDateString("en-US", { month: "numeric", day: "numeric" }).toUpperCase();
+};
+
 export const formatDay = (time) => {
   const date = new Date(time);
   return date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();

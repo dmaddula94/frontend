@@ -1,15 +1,26 @@
 import React from 'react';
 import { Box, Typography, } from '@mui/material';
-import { formatTime } from "../../utils/weather";
+import { formatTime, formatDay } from "../../utils/weather";
 import Temp from "./Temp";
 import WeatherIcon from './WeatherIcon';
 
 export default function Hourly({ hourly, isDay }) {
+    const isStartOfDay = (day) => {
+        debugger;
+        const date = new Date(day);
+        return date.getHours() === 0 && date.getMinutes() === 0;
+    }
+
     return (
         <Box sx={{ display: 'flex', overflowX: 'auto' }}>
             {hourly.intervals.map((hour, index) => (
                 <Box key={index} className="hour">
                     <div className="aspect-ratio-box">
+                        {
+                            isStartOfDay(hour.startTime) && (
+                                <div className="day">{formatDay(hour.startTime)}</div>
+                            )
+                        }
                         <div className="aspect-ratio-box-content">
                             <div key="hour-time" className="hour-time">{formatTime(hour.startTime)}</div>
                             <div key="hour-icon" className="hour-icon"><WeatherIcon value={hour.values.weatherCode} isDay={isDay} /></div>
