@@ -10,6 +10,7 @@ import {getCurrentData} from "../../utils/openmeteo";
 
 import "./index.scss";
 import { useSelector } from "react-redux";
+import WeatherConfigurator from "./WeatherConfigurator";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -90,6 +91,7 @@ const Profile = () => {
             >
                 <Tab label="Profile" />
                 <Tab label="Favorite List" />
+                <Tab label="Settings" />
             </Tabs>
             <TabPanel value={value} index={0} style={{ width: "50%" }}>
                 {userData && <ProfileInfo user={userData} />}
@@ -98,6 +100,9 @@ const Profile = () => {
                 {userData && <FavoriteList
                     user={userData}
                 />}
+            </TabPanel>
+            <TabPanel value={value} index={2} style={{ width: "50%" }}>
+                <WeatherConfigurator />
             </TabPanel>
         </Box>
     );
