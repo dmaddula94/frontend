@@ -22,6 +22,8 @@ import ResetPassword from "./components/ResetPassword";
 import ChatBot from "./components/ChatBot";
 import GoogleMapRoutes from "./components/GoogleMapRoutes";
 import Notification from "./components/Notification";
+import WeatherHistory from "./components/WeatherHistory";
+import HistoricalDataGraphs from "./components/HistoricalDataGraphs";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -127,6 +129,15 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/weather-history" element={<WeatherHistory />} />
+                <Route
+                  path="/weather-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <HistoricalDataGraphs />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </div>
             <Footer />
