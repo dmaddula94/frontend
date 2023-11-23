@@ -6,64 +6,66 @@ import {
   Autocomplete,
   DirectionsRenderer,
   TrafficLayer,
-} from '@react-google-maps/api';
-import SearchIcon from '@mui/icons-material/Search';
-import { useTheme } from '@mui/material/styles';
-import { useRef, useState } from 'react';
+} from "@react-google-maps/api";
+import SearchIcon from "@mui/icons-material/Search";
+import { useTheme } from "@mui/material/styles";
+import { useRef, useState } from "react";
 import {
   TextField,
   InputAdornment,
   CircularProgress,
   Button,
-} from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-import tzlookup from 'tz-lookup';
-import { DateTime } from 'luxon';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
+} from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import tzlookup from "tz-lookup";
+import { DateTime } from "luxon";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 
-import { useDispatch, useSelector } from 'react-redux';
-import { setLocation } from '../../redux/reducers/locationSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { setLocation } from "../../redux/reducers/locationSlice";
 
-import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
-import { prettyPrintWeatherCode } from '../../utils/weather';
-import { getMetricData, getTimeZone } from '../../utils/openmeteo';
-import { askQuestion } from '../../utils/openai';
+import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
+import { prettyPrintWeatherCode } from "../../utils/weather";
+import { getMetricData, getTimeZone } from "../../utils/openmeteo";
+import { askQuestion } from "../../utils/openai";
+import api from "../../api";
 
 export default function GoogleMapRoutes() {
   const startLocationRef = useRef();
   const endLocationRef = useRef();
   const dispatch = useDispatch();
   const [directions, setDirections] = useState(null);
-  const [distance, setDistance] = useState('');
+  const [distance, setDistance] = useState("");
   const [isLoadingWeatherData, setIsLoadingWeatherData] = useState(false);
-  const [duration, setDuration] = useState('');
+  const [duration, setDuration] = useState("");
+  const [query, setQuery] = useState("tourist attractions");
   const location = useSelector((state) => {
     return state.location;
   });
   const sys_theme = useTheme();
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: 'AIzaSyCm8tykVzUw05yjP4qfvO9Qx69VH6miAAw',
-    libraries: ['places'],
+    googleMapsApiKey: "AIzaSyCm8tykVzUw05yjP4qfvO9Qx69VH6miAAw",
+    libraries: ["places"],
   });
   const initialCenter = { lat: location.latitude, lng: location.longitude };
   const [map, setMap] = useState(/** @type google.maps.Map */ (null));
   const initialZoom = 10;
-  const [travelMode, setTravelMode] = useState('DRIVING');
-  const [previousMarkers, setPreviousMarkers] = useState([]);
+  const [travelMode, setTravelMode] = useState("DRIVING");
+  const [markers, setMarkers] = useState([]);
 
   const getUVIndexLabel = (uvIndex) => {
     if (uvIndex <= 3) {
-      return 'L';
+      return "L";
     } else if (uvIndex <= 6) {
-      return 'M';
+      return "M";
     } else if (uvIndex <= 9) {
-      return 'H';
+      return "H";
     } else {
-      return 'E';
+      return "E";
     }
   };
 
@@ -71,7 +73,6 @@ export default function GoogleMapRoutes() {
     const hourly = apiResponse.hourly;
     const current = apiResponse.current_weather;
     const index = hourly.time.indexOf(time);
-    debugger;
     const apparentTemp = hourly.apparent_temperature[index];
     const uvIndex = hourly.uv_index[index];
     const precipitationSum = hourly.precipitation[index];
@@ -79,12 +80,12 @@ export default function GoogleMapRoutes() {
 
     // data
     const dataText =
-      `Time: ${time.split('T').join(' ')} <br>` +
+      `Time: ${time.split("T").join(" ")} <br>` +
       `Temp: ${Math.round(current.temperature)} ${
-        getMetricData() == 'fahrenheit' ? '°F' : '°C'
+        getMetricData() == "fahrenheit" ? "°F" : "°C"
       }<br>` +
       `Feels Like: ${Math.round(apparentTemp)} ${
-        getMetricData() == 'fahrenheit' ? '°F' : '°C'
+        getMetricData() == "fahrenheit" ? "°F" : "°C"
       }<br>` +
       `UV Index: ${Math.round(uvIndex)} - ${getUVIndexLabel(
         Math.round(uvIndex)
@@ -97,36 +98,36 @@ export default function GoogleMapRoutes() {
 
   const getWeatherIcon = (weatherCode) => {
     const weatherIcons = {
-      0: 'fas fa-sun', // clear_day
-      1: 'fas fa-cloud-sun', // mostly_clear_day
-      2: 'fas fa-cloud-sun', // partly_cloudy_day
-      3: 'fas fa-cloud', // cloudy
-      45: 'fas fa-smog', // fog
-      48: 'fas fa-smog', // fog_light
-      51: 'fas fa-cloud-drizzle', // drizzle
-      53: 'fas fa-cloud-drizzle', // drizzle
-      55: 'fas fa-cloud-showers-heavy', // rain_heavy
-      56: 'fas fa-cloud-meatball', // freezing_drizzle
-      57: 'fas fa-cloud-meatball', // freezing_rain_heavy
-      61: 'fas fa-cloud-rain', // rain_light
-      63: 'fas fa-cloud-rain', // rain
-      65: 'fas fa-cloud-showers-heavy', // rain_heavy
-      66: 'fas fa-cloud-meatball', // freezing_rain_light
-      67: 'fas fa-cloud-meatball', // freezing_rain_heavy
-      71: 'fas fa-snowflake', // snow_light
-      73: 'fas fa-snowflake', // snow
-      75: 'fas fa-snowflake', // snow_heavy
-      77: 'fas fa-icicles', // ice_pellets
-      80: 'fas fa-cloud-rain', // rain_light
-      81: 'fas fa-cloud-rain', // rain
-      82: 'fas fa-cloud-showers-heavy', // rain_heavy
-      85: 'fas fa-snowflake', // snow_light
-      86: 'fas fa-snowflake', // snow_heavy
-      95: 'fas fa-bolt', // tstorm
-      96: 'fas fa-bolt', // tstorm
-      99: 'fas fa-bolt', // tstorm
+      0: "fas fa-sun", // clear_day
+      1: "fas fa-cloud-sun", // mostly_clear_day
+      2: "fas fa-cloud-sun", // partly_cloudy_day
+      3: "fas fa-cloud", // cloudy
+      45: "fas fa-smog", // fog
+      48: "fas fa-smog", // fog_light
+      51: "fas fa-cloud-drizzle", // drizzle
+      53: "fas fa-cloud-drizzle", // drizzle
+      55: "fas fa-cloud-showers-heavy", // rain_heavy
+      56: "fas fa-cloud-meatball", // freezing_drizzle
+      57: "fas fa-cloud-meatball", // freezing_rain_heavy
+      61: "fas fa-cloud-rain", // rain_light
+      63: "fas fa-cloud-rain", // rain
+      65: "fas fa-cloud-showers-heavy", // rain_heavy
+      66: "fas fa-cloud-meatball", // freezing_rain_light
+      67: "fas fa-cloud-meatball", // freezing_rain_heavy
+      71: "fas fa-snowflake", // snow_light
+      73: "fas fa-snowflake", // snow
+      75: "fas fa-snowflake", // snow_heavy
+      77: "fas fa-icicles", // ice_pellets
+      80: "fas fa-cloud-rain", // rain_light
+      81: "fas fa-cloud-rain", // rain
+      82: "fas fa-cloud-showers-heavy", // rain_heavy
+      85: "fas fa-snowflake", // snow_light
+      86: "fas fa-snowflake", // snow_heavy
+      95: "fas fa-bolt", // tstorm
+      96: "fas fa-bolt", // tstorm
+      99: "fas fa-bolt", // tstorm
     };
-    return weatherIcons[weatherCode] || 'fas fa-question';
+    return weatherIcons[weatherCode] || "fas fa-question";
   };
 
   const getWeatherDataHtml = (apiResponse, time, timeIndex, city) => {
@@ -139,17 +140,17 @@ export default function GoogleMapRoutes() {
     const precipitationSum = hourly.precipitation[index];
     const weatherCode = hourly.weathercode[index];
 
-    console.log(`city: ${city} :::: timeIndex: ${timeIndex} ::::: index: ${index} :::: ${current}`);
+    // console.log(`city: ${city} :::: timeIndex: ${timeIndex} ::::: index: ${index} :::: ${current}`);
 
     return `
       <div class="weather-data">
         <div class="weather-data-time mb-2"><i class="fas fa-clock"></i> ${time}</div>
         <div class="weather-data-temperature mb-2"><i class="fas fa-thermometer-half"></i> ${Math.round(
           current
-        )} ${getMetricData() == 'fahrenheit' ? '°F' : '°C'}</div>
+        )} ${getMetricData() == "fahrenheit" ? "°F" : "°C"}</div>
         <div class="weather-data-feels-like mb-2"><i class="fas fa-thermometer-empty"></i> Feels Like: ${Math.round(
           apparentTemp
-        )} ${getMetricData() == 'fahrenheit' ? '°F' : '°C'}</div>
+        )} ${getMetricData() == "fahrenheit" ? "°F" : "°C"}</div>
         <div class="weather-data-uv-index mb-2"><i class="fas fa-sun"></i> UV Index: ${Math.round(
           uvIndex
         )} - ${getUVIndexLabel(Math.round(uvIndex))}</div>
@@ -193,66 +194,137 @@ export default function GoogleMapRoutes() {
     return Math.ceil((days * 24 + hours) / 24) + 1;
   };
 
-  // function getCityName(lat, lng) {
-  //   const geocoder = new google.maps.Geocoder();
-  //   const latlng = { lat: lat, lng: lng };
-  
-  //   geocoder.geocode({ location: latlng }, (results, status) => {
-  //     if (status === "OK") {
-  //       if (results[0]) {
-  //         const addressComponents = results[0].address_components;
-  //         for (let i = 0; i < addressComponents.length; i++) {
-  //           const types = addressComponents[i].types;
-  //           if (types.includes("locality")) {
-  //             const cityName = addressComponents[i].long_name;
-  //             console.log(cityName);
-  //             return cityName;
-  //           }
-  //         }
-  //       } else {
-  //         console.log("No results found");
-  //       }
-  //     } else {
-  //       console.error("Geocoder failed due to: " + status);
-  //     }
-  //   });
-  // }
+  const fetchTouristAttractions = async (start, end, waypoints) => {
+    const { data } = await api.post("/bot/attractions", {
+      start,
+      end,
+      waypoints,
+      query
+    });
+    return data.attractions;
+  };
+
+  async function getRoute(directionsService) {
+    return await directionsService.route({
+      origin: startLocationRef.current.value,
+      destination: endLocationRef.current.value,
+      travelMode: google.maps.TravelMode[travelMode],
+      drivingOptions: {
+        departureTime: new Date(Date.now()),
+        trafficModel: google.maps.TrafficModel.BEST_GUESS,
+      },
+    });
+  }
+
+  function updateMapBounds(route) {
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(route.legs[0].start_location);
+    bounds.extend(route.legs[0].end_location);
+    map.fitBounds(bounds);
+  }
+
+  function updateRouteInfo(route) {
+    setDistance(route.legs[0].distance.text);
+    setDuration(route.legs[0].duration.text);
+  }
+
+  const setOtherMarkers = async (
+    start_location,
+    weatherAPIUrl,
+    endTimeZone,
+    tZone,
+    dInHours,
+    address,
+    tourist = false
+  ) => {
+    let weatherResponse = await fetch(weatherAPIUrl);
+    let locationWeatherData = await weatherResponse.json();
+    const icon = !tourist ? "https://icons-for-free.com/iconfiles/png/512/sunny+cloudy+cloud+weather+forecast-1320568505378975061.png" : "https://icons-for-free.com/iconfiles/png/512/rain+rainbow+sign+sunny+weather+icon-1320196636747000582.png"
+    let time_ = DateTime.now()
+      .setZone(endTimeZone)
+      .plus({ hours: dInHours })
+      .toFormat("yyyy-MM-dd HH:mm");
+    let timeIndex = DateTime.now()
+      .setZone(tZone)
+      .plus({ hours: dInHours })
+      .startOf("hour")
+      .toFormat("yyyy-MM-dd,HH:mm")
+      .split(",")
+      .join("T");
+    const weatherDataText = getWeatherDataHtml(
+      locationWeatherData,
+      time_,
+      timeIndex,
+      address
+    );
+
+    // eslint-disable-next-line no-undef
+    let newMarker = new google.maps.Marker({
+      position: start_location,
+      map: map,
+      title: weatherDataText,
+      icon: {
+        url: icon,
+        //eslint-disable-next-line no-undef
+        scaledSize: new google.maps.Size(40, 40),
+      },
+      zIndex: 1999,
+    });
+    newMarker.addListener("click", function () {
+      // eslint-disable-next-line no-undef
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${address}</h6>
+          ${weatherDataText}
+          </div>`,
+      });
+
+      infoWindow.open(map, newMarker);
+      infoWindow.setOptions({
+        // eslint-disable-next-line no-undef
+        pixelOffset: new google.maps.Size(0, -30),
+        maxWidth: 200,
+      });
+
+      // info window style
+      const infoWindowStyle = `
+      .gm-style-iw {
+          background-color: #fff;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+          border-radius: 5px;
+      }
+  `;
+
+      const style = document.createElement("style");
+      style.type = "text/css";
+      style.appendChild(document.createTextNode(infoWindowStyle));
+      document.head.appendChild(style);
+    });
+
+    setMarkers((markers) => [...markers, newMarker]);
+  };
+
+  const clearMarkers = () => {
+    for (let marker of markers) {
+      marker.setMap(null);
+    }
+    setMarkers([]); // Reset the array
+  };
+
   const handleFindRoute = async () => {
     try {
       setDirections(null);
-
-      // Clear previous markers and routes
-      // if (directions) {
-      //   directions.setMap(null);
-      // }
-      // previousMarkers.forEach((marker) => marker.setMap(null));
+      
+      if (markers.length > 0) {
+        clearMarkers();
+      }
 
       // eslint-disable-next-line no-undef
       const directionsService = new google.maps.DirectionsService();
-      const routes = await directionsService.route({
-        origin: startLocationRef.current.value,
-        destination: endLocationRef.current.value,
-        // eslint-disable-next-line no-undef
-        travelMode: google.maps.TravelMode[travelMode],
-        drivingOptions: {
-          departureTime: new Date(Date.now()),
-          // eslint-disable-next-line no-undef
-          trafficModel: google.maps.TrafficModel.BEST_GUESS,
-        },
-      });
-
+      let routes = await getRoute(directionsService);
       const route = routes.routes[0];
+      updateMapBounds(route);
+      updateRouteInfo(route);
 
-      // eslint-disable-next-line no-undef
-      const bounds = new google.maps.LatLngBounds();
-      bounds.extend(route.legs[0].start_location);
-      bounds.extend(route.legs[0].end_location);
-      map.fitBounds(bounds);
-      setDistance(route.legs[0].distance.text);
-      setDuration(route.legs[0].duration.text);
-      // console.log('Disance & Duration');
-      // console.log(route.legs[0].distance.text);
-      // console.log(route.legs[0].duration.text);
       const durationInHours = convertDurationToHours(
         route.legs[0].duration.text
       );
@@ -269,27 +341,27 @@ export default function GoogleMapRoutes() {
 
       const currentTime = DateTime.now()
         .setZone(startTimeZone)
-        .toFormat('yyyy-MM-dd HH:mm');
+        .toFormat("yyyy-MM-dd HH:mm");
 
       const endTime = DateTime.now()
         .setZone(endTimeZone)
         .plus({ hours: durationInHours })
-        .toFormat('yyyy-MM-dd HH:mm');
+        .toFormat("yyyy-MM-dd HH:mm");
 
       const currentTimeIndex = DateTime.now()
         .setZone(startTimeZone)
-        .startOf('hour')
-        .toFormat('yyyy-MM-dd,HH:mm')
-        .split(',')
-        .join('T');
+        .startOf("hour")
+        .toFormat("yyyy-MM-dd,HH:mm")
+        .split(",")
+        .join("T");
 
       const endTimeIndex = DateTime.now()
         .setZone(endTimeZone)
-        .startOf('hour')
+        .startOf("hour")
         .plus({ hours: durationInHours })
-        .toFormat('yyyy-MM-dd,HH:mm')
-        .split(',')
-        .join('T');
+        .toFormat("yyyy-MM-dd,HH:mm")
+        .split(",")
+        .join("T");
 
       const startLocationWeatherAPIUrl = getWeatherApiURL(
         route.legs[0].start_location.lat(),
@@ -311,11 +383,6 @@ export default function GoogleMapRoutes() {
         );
         const startLocationWeatherData =
           await startLocationWeatherresponse.json();
-        // console.log('start location Weather Data ', startLocationWeatherData);
-        // const startLocWeatherDataText = getWeatherDataText(
-        //   startLocationWeatherData,
-        //   currentTime
-        // );
 
         const startLocWeatherDataText = getWeatherDataHtml(
           startLocationWeatherData,
@@ -326,147 +393,124 @@ export default function GoogleMapRoutes() {
           endLocationWeatherAPIUrl
         );
         const endLocationWeatherData = await endLocationWeatherresponse.json();
-        // console.log('end location Weather Data ', endLocationWeatherData);
-        // const endLocWeatherDataText = getWeatherDataText(
-        //   endLocationWeatherData,
-        //   endTime
-        // );
 
         const endLocWeatherDataText = getWeatherDataHtml(
           endLocationWeatherData,
           endTime,
           endTimeIndex
         );
-        
+
         let numWaypoints = 15;
         let len = route.legs[0].steps?.length;
-        console.log("Steps: " + len)
-        //let incrBy = Math.round(len / 15);
-        //console.log("Increment by: " + incrBy)
         let accumulatedDuration = 0;
         let durationStep = route.legs[0].duration?.value / numWaypoints;
         let nextDurationMilestone = durationStep;
-        console.log("Duration step: " + durationStep);
+
+        const waypoints = [];
+
+        const geocodePromises = [];
 
         for (let i = 0; i < len; i++) {
           let step = route.legs[0].steps[i];
           accumulatedDuration += step.duration.value;
 
-          if (accumulatedDuration < nextDurationMilestone) {
-            continue;
-          } else {
-            while (accumulatedDuration >= nextDurationMilestone) {
-              nextDurationMilestone += durationStep;
-            }
-          }
+          if (accumulatedDuration >= nextDurationMilestone) {
+            nextDurationMilestone += durationStep;
 
-          console.log("Next milestone: " + nextDurationMilestone)
+            let lat = step.start_location.lat();
+            let lng = step.start_location.lng();
+            let address = '';
 
-          let lat = step.start_location.lat();
-          let lng = step.start_location.lng();
-          let address = '';
-          const geocoder = new google.maps.Geocoder();
-          const latlng = { lat: lat, lng: lng };
-          geocoder.geocode({ location: latlng }, (results, status) => {
-            if (status === "OK") {
-              if (results[0]) {
-                const addressComponents = results[0].address_components;
-                let city = '';
-                let state = '';
-                for (let i = 0; i < addressComponents.length; i++) {
-                  const types = addressComponents[i].types;
-                  if (types.includes("locality")) {
-                    city = addressComponents[i].long_name;
+            // Create a promise for the geocoding operation
+            const geocodePromise = new Promise((resolve, reject) => {
+              const geocoder = new google.maps.Geocoder();
+              const latlng = { lat: lat, lng: lng };
+              geocoder.geocode({ location: latlng }, (results, status) => {
+                if (status === "OK") {
+                  if (results[0]) {
+                    const addressComponents = results[0].address_components;
+                    let city = "";
+                    let state = "";
+                    for (let j = 0; j < addressComponents.length; j++) {
+                      const types = addressComponents[j].types;
+                      if (types.includes("locality")) {
+                        city = addressComponents[j].long_name;
+                      }
+                      if (types.includes("administrative_area_level_1")) {
+                        state = addressComponents[j].short_name;
+                      }
+                    }
+                    address = `${city}, ${state}`;
+                    resolve(address);
+                  } else {
+                    resolve("No results found");
                   }
-
-                  if (types.includes("administrative_area_level_1")) {
-                    state = addressComponents[i].short_name;
-                  }
-
-                  address = `${city}, ${state}`;
+                } else {
+                  reject("Geocoder failed due to: " + status);
                 }
-              } else {
-                console.log("No results found");
+              });
+            });
+
+            geocodePromises.push(geocodePromise);
+
+            const dInHours = Math.round(accumulatedDuration / 3600);
+            let dInDays = Math.ceil(dInHours / 24) + 1;
+            let tZone = tzlookup(lat, lng);
+            let weatherAPIUrl = getWeatherApiURL(lat, lng, dInDays, tZone);
+
+            setOtherMarkers(
+              step.start_location,
+              weatherAPIUrl,
+              endTimeZone,
+              tZone,
+              dInHours,
+              address
+            );
+          }
+        }
+
+        Promise.all(geocodePromises)
+          .then(async (addresses) => {
+            addresses.forEach((address) => {
+              if (address !== "No results found") {
+                waypoints.push(address);
               }
-            } else {
-              console.error("Geocoder failed due to: " + status);
+            });
+            try {
+              const attractions = await fetchTouristAttractions(
+                startLocationRef.current.value,
+                endLocationRef.current.value,
+                waypoints.join("; ")
+              );
+              attractions.forEach((element) => {
+                const {
+                  name,
+                  state,
+                  duration,
+                  distance,
+                  coordinates: { lat, lng },
+                } = element;
+                let dInDays = Math.ceil(duration / 24) + 1;
+                let tZone = tzlookup(lat, lng);
+                let weatherAPIUrl = getWeatherApiURL(lat, lng, dInDays, tZone);
+                setOtherMarkers(
+                  new google.maps.LatLng(lat, lng),
+                  weatherAPIUrl,
+                  endTimeZone,
+                  tZone,
+                  duration,
+                  `${name}, ${state}`,
+                  true
+                );
+              });
+            } catch (err) {
+              console.error(err);
             }
           })
-          // const dInHours = convertDurationToHours(
-          //   step.duration.text
-          // );
-          const dInHours = Math.round(accumulatedDuration / 3600)
-          let dInDays = Math.ceil(dInHours / 24) + 1
-          let tZone = tzlookup(lat, lng);
-          let weatherAPIUrl = getWeatherApiURL(lat, lng, dInDays, tZone);
-
-          let weatherResponse = await fetch(weatherAPIUrl);
-          let locationWeatherData = await weatherResponse.json();
-          let time_ = DateTime.now()
-            .setZone(endTimeZone)
-            .plus({ hours: dInHours })
-            .toFormat('yyyy-MM-dd HH:mm');
-          let timeIndex = DateTime.now()
-            .setZone(tZone)
-            .plus({ hours: dInHours })
-            .startOf('hour')
-            .toFormat('yyyy-MM-dd,HH:mm')
-            .split(',')
-            .join('T');
-            // console.log(city)
-            // console.log('DURATION', dInHours)
-            console.log('LOCATION WEATHER DATA', locationWeatherData);
-            // console.log('TIME', time_);
-            // console.log('TIME INDEX', timeIndex);
-          const weatherDataText = getWeatherDataHtml(
-            locationWeatherData,
-            time_,
-            timeIndex,
-            address
-          );
-          // create markers for start and end locations
-          // eslint-disable-next-line no-undef
-          let newMarker = new google.maps.Marker({
-            position: step.start_location,
-            map: map,
-            title: weatherDataText,
-            icon: {
-              url: 'https://icons-for-free.com/iconfiles/png/512/cloudy+day+forecast+sun+sunny+weather+icon-1320195254084556383.png',
-              //eslint-disable-next-line no-undef
-              scaledSize: new google.maps.Size(40, 40),
-            },
-            zIndex: 1999,
+          .catch((error) => {
+            console.error("Error in geocoding: ", error);
           });
-          newMarker.addListener('click', function () {
-            // eslint-disable-next-line no-undef
-            const infoWindow = new google.maps.InfoWindow({
-              content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${address}</h6>
-                ${weatherDataText}
-                </div>`,
-            });
 
-            infoWindow.open(map, newMarker);
-            infoWindow.setOptions({
-              // eslint-disable-next-line no-undef
-              pixelOffset: new google.maps.Size(0, -30),
-              maxWidth: 200,
-            });
-
-            // info window style
-            const infoWindowStyle = `
-            .gm-style-iw {
-                background-color: #fff;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                border-radius: 5px;
-            }
-        `;
-
-            const style = document.createElement('style');
-            style.type = 'text/css';
-            style.appendChild(document.createTextNode(infoWindowStyle));
-            document.head.appendChild(style);
-          });
-        }
         // create markers for start and end locations
         // eslint-disable-next-line no-undef
         const startMarker = new google.maps.Marker({
@@ -474,7 +518,7 @@ export default function GoogleMapRoutes() {
           map: map,
           title: startLocWeatherDataText,
           icon: {
-            url: 'https://icons-for-free.com/iconfiles/png/512/cloudy+day+forecast+sun+sunny+weather+icon-1320195254084556383.png',
+            url: "https://icons-for-free.com/iconfiles/png/512/sunny+cloudy+cloud+weather+forecast-1320568505378975061.png",
             //eslint-disable-next-line no-undef
             scaledSize: new google.maps.Size(40, 40),
           },
@@ -486,22 +530,13 @@ export default function GoogleMapRoutes() {
           map: map,
           title: endLocWeatherDataText,
           icon: {
-            url: 'https://icons-for-free.com/iconfiles/png/512/cloudy+day+forecast+sun+sunny+weather+icon-1320195254084556383.png',
+            url: "https://icons-for-free.com/iconfiles/png/512/sunny+cloudy+cloud+weather+forecast-1320568505378975061.png",
             //eslint-disable-next-line no-undef
             scaledSize: new google.maps.Size(40, 40),
           },
           zIndex: 1999,
         });
-        endMarker.addListener('click', function () {
-          // open info window
-          // eslint-disable-next-line no-undef
-          // const infoWindow = new google.maps.InfoWindow({
-          //   content:
-          //     '<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">Weather Forecast</h6><p style="margin: 0;">' +
-          //     endLocWeatherDataText +
-          //     "</p></div>",
-          // });
-
+        endMarker.addListener("click", function () {
           // eslint-disable-next-line no-undef
           const infoWindow = new google.maps.InfoWindow({
             content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${routes.request.destination.query}</h6>
@@ -522,24 +557,14 @@ export default function GoogleMapRoutes() {
               background-color: #fff;
               box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
               border-radius: 5px;
-          }
-      `;
+          }`;
 
-          const style = document.createElement('style');
-          style.type = 'text/css';
+          const style = document.createElement("style");
+          style.type = "text/css";
           style.appendChild(document.createTextNode(infoWindowStyle));
           document.head.appendChild(style);
         });
-        startMarker.addListener('click', function () {
-          // open info window
-          // eslint-disable-next-line no-undef
-          // const infoWindow = new google.maps.InfoWindow({
-          //   content:
-          //     '<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">Weather Forecast</h6><p style="margin: 0;">' +
-          //     startLocWeatherDataText +
-          //     "</p></div>",
-          // });
-
+        startMarker.addListener("click", function () {
           // eslint-disable-next-line no-undef
           const infoWindow = new google.maps.InfoWindow({
             content: `<div style="color: black; padding: 10px;"><h6 style="margin: 0 0 10px;">${routes.request.origin.query}</h6>
@@ -561,62 +586,36 @@ export default function GoogleMapRoutes() {
           }
       `;
 
-          const style = document.createElement('style');
-          style.type = 'text/css';
+          const style = document.createElement("style");
+          style.type = "text/css";
           style.appendChild(document.createTextNode(infoWindowStyle));
           document.head.appendChild(style);
         });
+        setMarkers((markers) => [...markers, startMarker, endMarker]);
         startMarker.setMap(map);
         endMarker.setMap(map);
-        // setPreviousMarkers([startMarker, endMarker]);
-
-        // Ask ChatGPT question
-        const findAttractions = false;
-
-        if (findAttractions) {
-          // Format the question
-          const question = `What are the top 10 tourist attractions en route from 
-            ${startLocationRef.current.value} to ${endLocationRef.current.value}? 
-            Separate location and description with a colon.`;
-
-          // Ask the question to ChatGPT and split the response into an array
-          console.log(question);
-          const content = await askQuestion(question);
-          const attractionArray = content.split(/\s*\d+\.\s*/);
-          attractionArray.shift();
-
-          console.log(attractionArray);
-
-          // Go through the array and process each list element
-          attractionArray.forEach(element => {
-            const location = element.split(":");
-            // location[0] is the location name, location[1] is the description
-            console.log(location[0] + " --> " + location[1]);
-          });
-        }
-
       } catch (error) {
-        console.error('Error finding weather.', error);
-        handleSnackBar('Error finding weather. Please try again.');
+        // console.error('Error finding weather.', error);
+        handleSnackBar("Error finding weather. Please try again.");
       } finally {
         setIsLoadingWeatherData(false);
       }
 
       setDirections(routes);
     } catch (error) {
-      console.error('Error finding route.', error);
-      handleSnackBar('Error finding route. Please try again.');
+      console.error("Error finding route.", error);
+      handleSnackBar("Error finding route. Please try again.");
     }
   };
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [snackBarMessage, setSnackBarMessage] = useState("");
   const handleSnackBar = (message) => {
     setSnackBarMessage(message);
     setSnackBarOpen(true);
   };
 
   const handleSnackBarClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setSnackBarOpen(false);
@@ -648,14 +647,14 @@ export default function GoogleMapRoutes() {
       {isLoadingWeatherData ? (
         <div
           style={{
-            display: 'flex',
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -180%)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100px',
+            display: "flex",
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -180%)",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100px",
             zIndex: 9999,
           }}
         >
@@ -668,7 +667,7 @@ export default function GoogleMapRoutes() {
         <Autocomplete>
           <TextField
             style={{
-              paddingLeft: '10px',
+              paddingLeft: "10px",
             }}
             fullWidth
             placeholder="Start location"
@@ -685,7 +684,7 @@ export default function GoogleMapRoutes() {
                 <InputAdornment position="end">
                   <LocationSearchingIcon
                     style={{
-                      cursor: 'pointer',
+                      cursor: "pointer",
                       color: sys_theme.palette.text.primary,
                     }}
                     onClick={getCurrentStartLocation}
@@ -710,17 +709,6 @@ export default function GoogleMapRoutes() {
                   />
                 </InputAdornment>
               ),
-              // startAdornment: (
-              //   <InputAdornment position="end">
-              //     <LocationSearchingIcon
-              //       style={{
-              //         cursor: "pointer",
-              //         color: sys_theme.palette.text.primary,
-              //       }}
-              //       onClick={getCurrentEndLocation}
-              //     />
-              //   </InputAdornment>
-              // ),
             }}
           />
         </Autocomplete>
@@ -732,23 +720,37 @@ export default function GoogleMapRoutes() {
             value={travelMode}
             onChange={(e) => setTravelMode(e.target.value)}
           >
-            <MenuItem value={'DRIVING'}>Driving</MenuItem>
-            <MenuItem value={'WALKING'}>Walking</MenuItem>
-            <MenuItem value={'BICYCLING'}>Bicycling</MenuItem>
-            <MenuItem value={'TRANSIT'}>Transit</MenuItem>
+            <MenuItem value={"DRIVING"}>Driving</MenuItem>
+            <MenuItem value={"WALKING"}>Walking</MenuItem>
+            <MenuItem value={"BICYCLING"}>Bicycling</MenuItem>
+            <MenuItem value={"TRANSIT"}>Transit</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+      <div className="mb-4 col-12 col-md-2">
+        <FormControl fullWidth>
+          <InputLabel>Attractions</InputLabel>
+          <Select
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          >
+            <MenuItem value={"tourist attractions"}>Tourist Attractions</MenuItem>
+            <MenuItem value={"national parks"}>National Parks</MenuItem>
+            <MenuItem value={"state parks"}>Sate Parks</MenuItem>
+            <MenuItem value={"upcoming events"}>Upcoming Events</MenuItem>
           </Select>
         </FormControl>
       </div>
       <div
         className="mb-4 col-12 col-md-2"
-        style={{ display: 'flex', justifyContent: 'center' }}
+        style={{ display: "flex", justifyContent: "center" }}
       >
         <Button
           variant="contained"
           color="primary"
           onClick={handleFindRoute}
           fullWidth
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: "100%", height: "100%" }}
         >
           Find Route
         </Button>
@@ -757,10 +759,10 @@ export default function GoogleMapRoutes() {
         {!isLoaded ? (
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '500px',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "500px",
             }}
           >
             <CircularProgress />
@@ -769,7 +771,7 @@ export default function GoogleMapRoutes() {
           <GoogleMap
             center={initialCenter}
             zoom={initialZoom}
-            mapContainerStyle={{ width: '100%', height: '500px' }}
+            mapContainerStyle={{ width: "100%", height: "500px" }}
             options={{
               zoomControl: true,
               streetViewControl: true,
@@ -789,7 +791,7 @@ export default function GoogleMapRoutes() {
         open={snackBarOpen}
         autoHideDuration={6000}
         onClose={handleSnackBarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
           elevation={6}
