@@ -6,7 +6,6 @@ import WeatherIcon from './WeatherIcon';
 
 export default function Hourly({ hourly, isDay }) {
     const isStartOfDay = (day) => {
-        debugger;
         const date = new Date(day);
         return date.getHours() === 0 && date.getMinutes() === 0;
     }

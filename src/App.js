@@ -129,9 +129,9 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/weather-history" element={<WeatherHistory />} />
+                {/* <Route path="/weather-history" element={<WeatherHistory />} /> */}
                 <Route
-                  path="/weather-dashboard"
+                  path="/weather-history"
                   element={
                     <ProtectedRoute>
                       <HistoricalDataGraphs />

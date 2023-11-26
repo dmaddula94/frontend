@@ -13,6 +13,8 @@ import { setFavoriteLocationsList } from "../../redux/reducers/weatherSlice";
 import { setLocation } from "../../redux/reducers/locationSlice";
 import { update } from "../../redux/reducers/userSlice";
 import { useSnackbar } from "notistack";
+import { Switch } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 function FavoriteList({ user }) {
   const dispatch = useDispatch();
@@ -20,6 +22,24 @@ function FavoriteList({ user }) {
   const { enqueueSnackbar } = useSnackbar();
   const { locations } = user;
   const [favLocations, setFavLocations] = useState(locations);
+
+  const toggleAlerts = async (e, location) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      const { data } = await api.patch("/userLocation", {
+        _id: location._id,
+        alerts: location.alerts,
+        update: true
+      });
+      dispatch(update({ user: data }));
+      dispatch(
+        setFavoriteLocationsList({ favoriteLocationsList: data.location })
+      );
+    } catch (error) {
+      console.error("Error Toggling Alerts:", error);
+    }
+  };
 
   const deleteLocation = async (e, location) => {
     e.stopPropagation();
@@ -109,6 +129,22 @@ function FavoriteList({ user }) {
                       realtime={location}
                       isDay={location?.is_day}
                       showWeatherIcon={false}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          style={{ cursor: "pointer", zIndex: 2 }}
+                          checked={location.alerts}
+                          onChange={(e) => {
+                            location.alerts
+                              ? (location.alerts = false)
+                              : (location.alerts = true);
+                            toggleAlerts(e,location)
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label={'Alerts'}
                     />
                   </div>
                   <ClearIcon
