@@ -18,6 +18,8 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DatePicker from "@mui/lab/DatePicker";
 
+const MAX_DATA_POINTS = 500;
+
 const HistoricalDataGraphs = () => {
   const location = useSelector((state) => state.location);
   const [data, setData] = useState([
@@ -60,7 +62,6 @@ const HistoricalDataGraphs = () => {
         startDate,
         endDate
       );
-      console.log(weatherData);
       setData(weatherData);
     } catch (error) {
       console.error("Error fetching weather data:", error);
@@ -123,7 +124,8 @@ const HistoricalDataGraphs = () => {
 
       const formattedData = [];
 
-      for (let i = 0; i < weatherData.time.length; i++) {
+      const step = Math.floor(weatherData.time.length / MAX_DATA_POINTS)
+      for (let i = 0; i < weatherData.time.length; i += step) {
         const date = weatherData.time[i];
 
         formattedData.push({
@@ -192,9 +194,9 @@ const HistoricalDataGraphs = () => {
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
+          <XAxis dataKey="date" tick={{fill:"#8884d8"}} minTickGap={20}/>
+          <YAxis tick={{fill:"#8884d8"}}/>
+          <Tooltip labelStyle={{color:"#8884d8"}}/>
           <Legend />
           <Area
             type="monotone"
@@ -208,9 +210,9 @@ const HistoricalDataGraphs = () => {
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
+          <XAxis dataKey="date" tick={{fill:"#82ca9d"}} minTickGap={20}/>
+          <YAxis tick={{fill:"#82ca9d"}}/>
+          <Tooltip labelStyle={{color:"#82ca9d"}}/>
           <Legend />
           <Area
             type="monotone"
@@ -224,9 +226,9 @@ const HistoricalDataGraphs = () => {
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
+          <XAxis dataKey="date" tick={{fill:"#ffc658"}} minTickGap={20}/>
+          <YAxis tick={{fill:"#ffc658"}}/>
+          <Tooltip labelStyle={{color:"#ffc658"}}/>
           <Legend />
           <Area
             type="monotone"
@@ -240,9 +242,9 @@ const HistoricalDataGraphs = () => {
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
+          <XAxis dataKey="date" tick={{fill:"#ff7300"}} minTickGap={20}/>
+          <YAxis tick={{fill:"#ff7300"}}/>
+          <Tooltip labelStyle={{color:"#ff7300"}}/>
           <Legend />
           <Area
             type="monotone"
