@@ -328,9 +328,9 @@ function Header() {
                         justifyContent: 'space-between',
                       }}
                       button
-                      onClick={() => navigate('/weather-dashboard')}
+                      onClick={() => navigate('/weather-history')}
                     >
-                      <ListItemText primary="Weather Dashboard" />
+                      <ListItemText primary="Weather History" />
                       <ListItemIcon>
                         <ChevronRightIcon />
                       </ListItemIcon>

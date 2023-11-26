@@ -736,7 +736,7 @@ export default function GoogleMapRoutes() {
           >
             <MenuItem value={"tourist attractions"}>Tourist Attractions</MenuItem>
             <MenuItem value={"national parks"}>National Parks</MenuItem>
-            <MenuItem value={"state parks"}>Sate Parks</MenuItem>
+            <MenuItem value={"state parks"}>State Parks</MenuItem>
             <MenuItem value={"upcoming events"}>Upcoming Events</MenuItem>
           </Select>
         </FormControl>
