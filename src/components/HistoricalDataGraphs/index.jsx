@@ -18,7 +18,7 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DatePicker from "@mui/lab/DatePicker";
 
-const MAX_DATA_POINTS = 500;
+const MAX_DATA_POINTS = 360;
 
 const HistoricalDataGraphs = () => {
   const location = useSelector((state) => state.location);
