@@ -42,7 +42,7 @@ function Header() {
   const [insightTxt, setInsightTxt] = useState('Enable Insights');
   const [isInsightsEnabled, setIsInsightsEnabled] = useState(false);
   const WEATHER_ALERTS_INTERVAL_MILLIS = 900000; // 10 sec
-  const WEATHER_INSIGHTS_INTERVAL_MILLIS = 900000; // 10 sec
+  const WEATHER_INSIGHTS_INTERVAL_MILLIS = 300000; // 10 sec
   const location = useSelector((state) => {
     return state.location;
   });

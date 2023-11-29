@@ -36,6 +36,7 @@
       bottom: 64px;
       width: 100%;
       box-shadow: 0 -6px 99px -17px rgba(0, 0, 0, 0.68);
+      z-index: 999;
     }
 
     @media screen and (min-width: 640px) {
@@ -105,6 +106,39 @@
     @media screen and (min-width: 640px) {
       .chatbot__message-window {
         height: 380px;
+      }
+    }
+
+    @media screen and (max-width: 640px) {
+
+      .chatbot--closed {
+        right: 24px;
+      }
+
+      .chatbot.chatbot--closed {
+        top: auto;
+        width: 48px;
+        height: 48px;
+      }
+
+      .chatbot.chatbot--closed .chatbot__header {
+        width: 48px;
+        height: 48px;
+        padding: 16px;
+        border-radius: 50%;
+      }
+
+      .chatbot__header p {
+        margin-right: 20px;
+      }
+
+      .chatbot.chatbot--closed .chatbot__header .icon-speech {
+        width: 32px;
+        height: 32px;
+      }
+
+      .chatbot.chatbot--closed .chatbot__header p {
+        display: none;
       }
     }
 
