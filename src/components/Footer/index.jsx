@@ -27,7 +27,7 @@ function Footer() {
           &copy; {new Date().getFullYear()} Marist Weather Dashboard
         </Typography>
         <Box className='mobile-hide'>
-          <Link href="/terms" color="inherit" sx={{ mx: 1 }}>
+          {/* <Link href="/terms" color="inherit" sx={{ mx: 1 }}>
             Terms and Conditions
           </Link>
           <Link href="/privacy" color="inherit" sx={{ mx: 1 }}>
@@ -35,7 +35,7 @@ function Footer() {
           </Link>
           <Link href="/contact" color="inherit" sx={{ mx: 1 }}>
             Contact
-          </Link>
+          </Link> */}
         </Box>
       </Box>
     </Box>
